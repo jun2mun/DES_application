@@ -1,0 +1,8 @@
+.main {
+    display: flex;
+    flex-direction : column;
+}
+
+#logo {
+    height: 300px;
+}
