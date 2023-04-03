@@ -1,9 +1,12 @@
+const net = require('net');
+
 class mainPages {
     constructor($body){
         this.$body = $body;
     }
     
     setState(){
+
         this.render();
     }
 
@@ -27,25 +30,33 @@ class mainPages {
             const urlchange = new CustomEvent("urlchange",{
                 detail: {href: "/detail"}
             });
-            this.derender(div);
+            //this.derender(div);
             document.dispatchEvent(urlchange);
         })
+        this.$body.appendChild(div);
 
+        const button2 = document.createElement('button');
+        div.appendChild(button2);
+
+        const text2 = document.createTextNode('API pages');
+        button2.appendChild(text2);
+        
+        button2.addEventListener("click", (e) => {
+            window.history.pushState("","","/count/")
+            const urlchange = new CustomEvent("urlchange",{
+                detail: {href: "/count/"}
+            });
+            //this.derender(div);
+            document.dispatchEvent(urlchange);
+        })
         this.$body.appendChild(div);
     }
 
-    derender= (element) => {
+    destroy = (element) => {
         this.$body.removeChild(element);
     }
 
 }
-
-
-
-
-
-
-
 
 module.exports = {mainPages};
 

@@ -13,3 +13,7 @@
 # 윈도우  dll 에서 알아내야 할 것
 # 현재 포어그라운드 프로세스 | 프로세스 스크린타임
 # if 브라우저 인 경우, url 추출
+
+
+## createElement를 사용할지 innerHTML를 사용할지 고민함
+# -> https://stackoverflow.com/questions/2946656/advantages-of-createelement-over-innerhtml
