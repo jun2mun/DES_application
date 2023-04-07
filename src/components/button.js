@@ -1,4 +1,4 @@
-function button($body,text='button'){
+function button($body,text='button',path=''){
 
     
     const button2 = document.createElement('button');
@@ -6,7 +6,8 @@ function button($body,text='button'){
     button2.appendChild(text2);
     
     button2.addEventListener("click", (e) => {
-        const href = window.location.href ='';
+        console.log('hi path');
+        const href = window.location.href = '#detail';
         console.log(href);
     })
     $body.appendChild(button2);

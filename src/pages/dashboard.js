@@ -10,15 +10,28 @@ class dashboardPage {
 
     render(){
         const div = background(this.$body);
-        this.$body.appendChild(div)
+        this.$body.appendChild(div);
         header(div);
         
-        box(div);
-
-        for (let i = 0;i <10; i++){
-            button(div,`process${i}`)
+        const box1 = box(div);
+        for (let i = 0;i <5; i++){
+            button(box1,`process${i}`,'#detail')
         }
+        
+        const box2 = box(div);
+        for (let i = 0;i <5; i++){
+            button(box2,`process${i}`,'#detail')
+        }
+        
+        window.addEventListener("hashchange",(e)=> {
+            this.destroy();
+        });
     }
+
+    destroy = () => {
+        this.$body.innerHTML='';
+    }
+
 }
 
 module.exports = {dashboardPage};
