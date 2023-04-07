@@ -1,9 +1,9 @@
-function background(){
-
-    const div = document.createElement("div");
-    div.setAttribute("class","main")
+function background($body){
+    const div = $body;
+    div.setAttribute("class","background")
     div.style.backgroundColor='gray';
-    div.style.height = '1000px'
+    div.style.height = '100%'
+    div.style.width='100%'
     return div
 }
 

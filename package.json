@@ -12,6 +12,7 @@
     "dev": "nodemon --exec electron ."
   },
   "dependencies": {
+    "chart.js": "^4.2.1",
     "child-process": "^1.0.2",
     "electron-squirrel-startup": "^1.0.0",
     "ffi-napi": "^4.0.3",

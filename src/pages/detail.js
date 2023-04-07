@@ -9,12 +9,11 @@ class detailPages {
     }
 
     render(){
-        console.log("hi detail",this.$body)
+        console.log('detail render')
         const div = background(this.$body);
-        this.$body.appendChild(div);
         header(div);
         const text = document.createTextNode('detail page');
-        this.$body.appendChild(text);
+        div.appendChild(text);
         const box1 = box(div);
         for (let i = 0;i <5; i++){
             button(box1,`process${i}`,'#detail')

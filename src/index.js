@@ -20,6 +20,7 @@ class IndexView {
     // hash 경로 변경시, 이벤트 핸들러
     onRouteChange(e){
         const hashLocation = window.location.hash.substring(1);
+        app.innerHTML = ''; // hash 경로 변경시 초기화
         //console.log(hashLocation);
         this.loadContent(hashLocation);
     }
