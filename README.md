@@ -17,3 +17,7 @@
 
 ## createElement를 사용할지 innerHTML를 사용할지 고민함
 # -> https://stackoverflow.com/questions/2946656/advantages-of-createelement-over-innerhtml
+
+
+
+window.location.href
