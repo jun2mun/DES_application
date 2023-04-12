@@ -4,6 +4,31 @@ const {box} = require('../components/box.js');
 const {button} = require('../components/button.js');
 const {chart} = require('../components/chart.js');
 
+const data = {
+    datasets: [
+        {
+            label: 'Bar Dataset',
+            data: [10, 20, 30, 40,50,50,70],
+            // this dataset is drawn below
+            order: 2,
+            type: 'bar'
+        },
+],
+    labels: ['월', '화', '수', '목','금','토','일']
+}
+const data2 = {
+    datasets: [
+    {
+        label: 'Bar Dataset',
+        data: [10, 20, 30, 40,50,50,70],
+        // this dataset is drawn below
+        order: 2,
+        type: 'line'
+    }
+],
+    labels: ['월', '화', '수', '목','금','토','일']
+}
+
 class detailPages {
     constructor($body){
         this.$body = $body;
@@ -15,58 +40,39 @@ class detailPages {
         header(div);
         const text = document.createTextNode('detail page');
         div.appendChild(text);
-        
-        // 스크린 타임 컴포넌트
-        const ScreenTime = box(div);
-        ScreenTime.style.border = 'solid'
-        ScreenTime.style.display =  'flex'
-        ScreenTime.style.flexDirection = 'column'
-        ScreenTime.style.justifyContent = 'center'
 
-        const titles  =document.createElement('div')
-        titles.innerHTML = '일간 사용량'
-        ScreenTime.appendChild(titles)
+        ScreenTime(div,'screen',data) // 앱 사용시간 컴포넌트
 
-        const mychart = document.createElement('canvas');
-
-        const usage  =document.createElement('div')
-        usage.innerHTML = `전체 사용량 : ${1}`
-        ScreenTime.appendChild(usage)
-
-        mychart.setAttribute('id','myChart')
-        ScreenTime.appendChild(mychart);
-        ScreenTime.appendChild(usage);
-
-
-        const ctx = document.getElementById('myChart');
-        chart(ctx)
-
-
-        // 스크린 타임 컴포넌트
-        const ScreenTime2 = box(div);
-        ScreenTime2.style.border = 'solid'
-        ScreenTime2.style.display =  'flex'
-        ScreenTime2.style.flexDirection = 'column'
-        ScreenTime2.style.justifyContent = 'center'
-
-        const titles2  =document.createElement('div')
-        titles2.innerHTML = '눈 깜박임'
-        ScreenTime2.appendChild(titles2)
-
-        const mychart2 = document.createElement('canvas');
-
-        const usage2  =document.createElement('div')
-        usage2.innerHTML = `총 깜박임 : ${1}`
-        ScreenTime2.appendChild(usage2)
-
-        mychart2.setAttribute('id','myChart2')
-        ScreenTime2.appendChild(mychart2);
-        ScreenTime2.appendChild(usage2);
-        
-
-        const ctx2 = document.getElementById('myChart2');
-        chart(ctx2)
+        ScreenTime(div,'count',data2) // 눈 깜박임 컴포넌트
     }
+}
+
+function ScreenTime($div,name,char_data=null){
+    // 스크린 타임 컴포넌트
+    const ScreenTime = box($div);
+    ScreenTime.style.border = 'solid'
+    ScreenTime.style.display =  'flex'
+    ScreenTime.style.flexDirection = 'column'
+    ScreenTime.style.justifyContent = 'center'
+
+    const titles  =document.createElement('div')
+    titles.innerHTML = '일간 사용량'
+    ScreenTime.appendChild(titles)
+
+    const mychart = document.createElement('canvas');
+
+    const usage  =document.createElement('div')
+    usage.innerHTML = `전체 사용량 : ${1}`
+    ScreenTime.appendChild(usage)
+    mychart.setAttribute('id',`${name}`)
+    ScreenTime.appendChild(mychart);
+    ScreenTime.appendChild(usage);
+    
+
+    const ctx = document.getElementById(`${name}`);
+    chart(ctx,type=null,char_data)
+
+    return ScreenTime
 }
 
 module.exports = {detailPages};
