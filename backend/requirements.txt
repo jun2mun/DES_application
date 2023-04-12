@@ -1,0 +1,10 @@
+imutils
+cmake
+dlib
+numpy
+scipy
+opencv-python
+flask
+requests
+pysqlite3
+# 3.11.2
