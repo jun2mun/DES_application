@@ -1,6 +1,12 @@
 /// 일단 fixed ////
 
 const {background} = require('../components/background.js');
+
+const data = [
+    { state : 'Good' , src : './public/assets/logo.svg' },
+    { state : 'soso' , src : './public/assets/soso.svg' },
+    { state : 'bad' , src : './public/assets/bad.svg' },
+]
 class mainPages {
     constructor($body){
         this.$body = $body;
@@ -19,12 +25,13 @@ class mainPages {
         div.style.flexDirection ='column' // 열 정렬
         div.style.justifyContent ='center';
         div.style.alignItems  = 'center'
+
         /////
 
         // 이미지
         const img = document.createElement("img");
         img.setAttribute('id','logo')
-        img.src = './public/assets/logo.svg';
+        img.src = data[1]['src']
         div.appendChild(img);
 
 

@@ -47,30 +47,26 @@ class detailPages {
     }
 }
 
-function ScreenTime($div,name,char_data=null){
-    // 스크린 타임 컴포넌트
-    const ScreenTime = box($div);
-    ScreenTime.style.border = 'solid'
-    ScreenTime.style.display =  'flex'
-    ScreenTime.style.flexDirection = 'column'
-    ScreenTime.style.justifyContent = 'center'
 
-    const titles  =document.createElement('div')
-    titles.innerHTML = '일간 사용량'
-    ScreenTime.appendChild(titles)
+function ScreenTime($div,name,char_data=null){
+
+    // 스크린 타임 컴포넌트
+    const header = document.createElement('div');
+    header.setAttribute("class","header")
+    header.innerHTML = '일간 사용량'
 
     const mychart = document.createElement('canvas');
-
-    const usage  =document.createElement('div')
-    usage.innerHTML = `전체 사용량 : ${1}`
-    ScreenTime.appendChild(usage)
     mychart.setAttribute('id',`${name}`)
-    ScreenTime.appendChild(mychart);
-    ScreenTime.appendChild(usage);
-    
+    mychart.style.height = '300px' // 차트 크기 조정.
+    chart(mychart,type=null,char_data)
 
-    const ctx = document.getElementById(`${name}`);
-    chart(ctx,type=null,char_data)
+    const footer = document.createElement('div');
+    footer.setAttribute("class","footer")
+    footer.innerHTML = `전체 사용량 : ${1}`
+
+    const ScreenTime = box($div,'일간 사용량',[header,mychart,footer],'총 사용량');
+    ScreenTime.style.border = 'solid'
+
 
     return ScreenTime
 }

@@ -4,6 +4,7 @@ const {box} = require('../components/box.js');
 const {button} = require('../components/button.js');
 const {chart} = require('../components/chart.js')
 
+// test 데이터
 const data = {
     datasets: [
         {
@@ -40,7 +41,7 @@ class dashboardPage {
  
         const div = background(this.$body);
         header(div); // 헤더 출력
-        
+
         ScreenTime(div) // 스크린 타임 컴포넌트 출력
 
         most_used(div) // most used 컴포넌트 출력
@@ -51,29 +52,24 @@ class dashboardPage {
 
 
 function ScreenTime($div){
-    // 스크린 타임 컴포넌트
-    const ScreenTime = box($div);
-    ScreenTime.style.border = 'solid'
-    ScreenTime.style.display =  'flex'
-    ScreenTime.style.flexDirection = 'column'
-    ScreenTime.style.justifyContent = 'center'
 
-    const titles  =document.createElement('div')
-    titles.innerHTML = '일간 사용량'
-    ScreenTime.appendChild(titles)
+    // 스크린 타임 컴포넌트
+    const header = document.createElement('div');
+    header.setAttribute("class","header")
+    header.innerHTML = '일일 평균'
 
     const mychart = document.createElement('canvas');
-
-    const usage  =document.createElement('div')
-    usage.innerHTML = `전체 사용량 : ${1}`
-    ScreenTime.appendChild(usage)
     mychart.setAttribute('id','myChart')
-    ScreenTime.appendChild(mychart);
-    ScreenTime.appendChild(usage);
-    
+    mychart.style.height = '300px' // 차트 크기 조정.
+    chart(mychart,type=null,data)
 
-    const ctx = document.getElementById('myChart');
-    chart(ctx,type=null,data)
+    const footer = document.createElement('div');
+    footer.setAttribute("class","footer")
+    footer.innerHTML = '총 스크린 타임 :'
+
+    const ScreenTime = box($div,'일간 사용량',[header,mychart,footer],'총 사용량');
+    ScreenTime.style.border = 'solid'
+
 
     return ScreenTime
 }
@@ -117,6 +113,8 @@ function most_used($div){
         element.style.padding = '10px'
         element.style.border= 'solid';
     }
+
+    MostUsed.style.border = 'solid'
     return element
     
 }
