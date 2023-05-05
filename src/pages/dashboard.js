@@ -8,19 +8,20 @@ const {chart} = require('../components/chart.js')
 const data = {
     datasets: [
         {
-            label: 'Bar Dataset',
+            label: 'Notability',
+            data: [10, 20, 30, 40,50,50,70],
+            // this dataset is drawn below
+            order: 1,
+            type: 'bar'
+        },
+        {
+            label: 'photos',
             data: [10, 20, 30, 40,50,50,70],
             // this dataset is drawn below
             order: 2,
             type: 'bar'
         },
-        {
-            label: 'Bar Dataset',
-            data: [10, 20, 30, 40,50,50,70],
-            // this dataset is drawn below
-            order: 2,
-            type: 'line'
-        }
+
 ],
     labels: ['월', '화', '수', '목','금','토','일']
 }
@@ -56,19 +57,30 @@ function ScreenTime($div){
     // 스크린 타임 컴포넌트
     const header = document.createElement('div');
     header.setAttribute("class","header")
-    header.innerHTML = '일일 평균'
+    header.innerHTML = '일일 평균<br/>2분'
 
     const mychart = document.createElement('canvas');
     mychart.setAttribute('id','myChart')
     mychart.style.height = '300px' // 차트 크기 조정.
-    chart(mychart,type=null,data)
+    chart(mychart,type=null,data,
+        { scale : 
+            {
+                x: {
+                    stacked: true
+                },
+                y: {
+                    stacked : true
+                }
+            }
+        }
+    )
 
     const footer = document.createElement('div');
     footer.setAttribute("class","footer")
     footer.innerHTML = '총 스크린 타임 :'
 
     const ScreenTime = box($div,'일간 사용량',[header,mychart,footer],'총 사용량');
-    ScreenTime.style.border = 'solid'
+    //ScreenTime.style.border = 'solid'
 
 
     return ScreenTime
@@ -76,18 +88,18 @@ function ScreenTime($div){
 
 // mout used 컴포넌트
 function most_used($div){
-    const MostUsed = box($div);
+    const MostUsed = box($div,'MOST USED');
 
     const dataset = [
-        { icon : '../../public/assets/icon.svg', title : '1', progressbar : 11},
+        { icon : './public/assets/icon.svg', title : 'notabilty', progressbar : 11},
         
-        { icon : '../../public/assets/icon.svg', title : '2', progressbar : 22},
+        { icon : './public/assets/icon.svg', title : 'photos', progressbar : 22},
         
-        { icon : '../../public/assets/icon.svg', title : '3', progressbar : 33},
+        { icon : './public/assets/icon.svg', title : 'mail', progressbar : 33},
         
-        { icon : '../../public/assets/icon.svg', title : '4', progressbar : 44},
+        { icon : './public/assets/icon.svg', title : 'vscode', progressbar : 44},
         
-        { icon : '../../public/assets/icon.svg', title : '5', progressbar : 55}
+        { icon : './public/assets/icon.svg', title : 'chrome', progressbar : 55}
     ] // 테스트 데이터셋
 
     for (let i = 0;i < 3; i++){
@@ -96,25 +108,41 @@ function most_used($div){
         icon.src = dataset[i]['icon']
 
         const contents = document.createElement('div');
-        const title = document.createTextNode(dataset[i]['title'])
+        const content_title = document.createElement('div');
+        content_title.innerText = dataset[i]['title'];
+        const content_detail = document.createElement('div');
+        
         const bar = document.createElement('progress');
         bar.max='100'; bar.value= dataset[i]['progressbar']
         const use_time = document.createTextNode('2h 32m')
 
-        contents.appendChild(title)
-        contents.appendChild(bar)
-        contents.appendChild(use_time);
+        contents.appendChild(content_title)
+        content_detail.appendChild(bar)
+        content_detail.appendChild(use_time);
+        contents.appendChild(content_detail)
         element.appendChild(icon)
         element.appendChild(contents)
-        button(element,`process${i}`,'#detail')
+
+        button(element,`>`,'#detail')
         MostUsed.appendChild(element)
+        element.style.background = 'white'
+        element.style.borderRadius = '3%';
         element.style.display = 'flex';
         element.style.justifyContent = 'space-between'
         element.style.padding = '10px'
-        element.style.border= 'solid';
+        if (i === 0) {
+            element.style.borderTop = 'solid';
+        }
+        if (i != 2){
+            element.style.borderBottom = 'solid';
+        };
+        if (i === 2){
+            element.style.borderBottom = 'solid';
+        };
+
     }
 
-    MostUsed.style.border = 'solid'
+    //MostUsed.style.border = 'solid'
     return element
     
 }
