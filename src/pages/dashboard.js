@@ -43,48 +43,50 @@ class dashboardPage {
     
     setState(){
         callbackFlag = false
+        this.go(); // 즉시 실행
         return this.db_interact() // 로딩 화면을 띄워야 함.
     }
 
-    db_interact(){
-        timer = setInterval(async () => {
-            if(!callbackFlag){
-                let result = await (async function() {
-                    let db = db_conn()
-                    
-                    let new_data = {}
-                    new_data.datasets=[]
-                    new_data.labels = ['월', '화', '수', '목','금','토','일']
-                    
-                    for (let idx=0;idx<7;idx++){
-                        let query = `select name,count, SUM(ROUND((julianday(end_time)-JULIANDAY(start_time))* 86400/60)) AS difference from process where date = '${year}-${month}-${week_date+idx}' group by name order by difference desc limit 5;`
-                        let duplicate = false
-                        let results = await db_comm(db,'SELECT',query)
-                        results.forEach((result,index) => {
-                            new_data.datasets.forEach((data)=>{
-                                if (data.label == result.name){
-                                    duplicate = true
-                                }
-                            })
-                            console.log(duplicate)
-                            if (!duplicate){
-                                new_data.datasets.push({
-                                    label : `${result.name}`, data: [0,0,0,0,0,0,0], order : index, type : 'bar'
-                                })
-                            }
-                            new_data.datasets[index].data[idx] = result.difference
-                        })
-                    }
-        
-                    db_disconn(db)
-                    return new_data
+    async go(){
+        if(!callbackFlag){
+            let result = await (async function() {
+                let db = db_conn()
                 
-                })(); 
-        
-                this.data = result
-                this.render();
-            }    
-        }, 3000)
+                let new_data = {}
+                new_data.datasets=[]
+                new_data.labels = ['월', '화', '수', '목','금','토','일']
+                
+                for (let idx=0;idx<7;idx++){
+                    let query = `select name,count, SUM(ROUND((julianday(end_time)-JULIANDAY(start_time))* 86400/60)) AS difference from process where date = '${year}-${month}-${week_date+idx}' group by name order by difference desc limit 5;`
+                    let duplicate = false
+                    let results = await db_comm(db,'SELECT',query)
+                    results.forEach((result,index) => {
+                        new_data.datasets.forEach((data)=>{
+                            if (data.label == result.name){
+                                duplicate = true
+                            }
+                        })
+                        console.log(duplicate)
+                        if (!duplicate){
+                            new_data.datasets.push({
+                                label : `${result.name}`, data: [0,0,0,0,0,0,0], order : index, type : 'bar'
+                            })
+                        }
+                        new_data.datasets[index].data[idx] = result.difference
+                    })
+                }
+    
+                db_disconn(db)
+                return new_data
+            
+            })(); 
+    
+            this.data = result
+            this.render();
+        }    
+    }
+    db_interact(){
+        timer = setInterval(()=>this.go(), 10000)
         return timer
     }
 
