@@ -60,7 +60,7 @@ function box($body,title=null,content=null,comment=null){
         box_comment.setAttribute("class","box_comment")
         box_comment.style.paddingLeft = '10px'
         box_comment.style.fontSize = '10px'
-        box_comment.innerHTML = `오늘 오후 6:49 업데이트 됨 : ${1}`
+        box_comment.innerHTML = '오늘 오후 6:49 업데이트 됨'
         div.appendChild(box_comment)
     }
 

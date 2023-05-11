@@ -21,3 +21,8 @@
 
 
 window.location.href
+
+
+## 20.3.8 버전 다운그레이드 ##
+-> https://stackoverflow.com/questions/75668307/error-in-native-callback-using-ffi-napi-in-electron-and-electron-builder
+## 상위 버전 ffi 모듈 버그로 인해 사용 불가. ##

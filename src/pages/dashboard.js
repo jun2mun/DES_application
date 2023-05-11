@@ -3,35 +3,92 @@ const {background} = require('../components/background.js');
 const {box} = require('../components/box.js');
 const {button} = require('../components/button.js');
 const {chart} = require('../components/chart.js')
+const {db_conn,db_comm, db_disconn } = require('../utils/db_utils.js');
+const getDayOfWeek = require('../utils/time_utils.js');
+const { clearInterval } = require('timers');
+// SELECT 문 : 즉 electron에서 화면 업데이트 되는 것
 
-// test 데이터
-const data = {
-    datasets: [
-        {
-            label: 'Notability',
-            data: [10, 20, 30, 40,50,50,70],
-            // this dataset is drawn below
-            order: 1,
-            type: 'bar'
-        },
-        {
-            label: 'photos',
-            data: [10, 20, 30, 40,50,50,70],
-            // this dataset is drawn below
-            order: 2,
-            type: 'bar'
-        },
-
-],
-    labels: ['월', '화', '수', '목','금','토','일']
-}
-
+let today = new Date();
+let year = today.getFullYear(); // 년도
+let month = String(today.getMonth() + 1).padStart(2, "0");  // 월
+let date = String(today.getDate()).padStart(2, "0");  // 날짜
+let week_date = getDayOfWeek(`'${year}-${month}-${date}'`)
+let timer;
+let callbackFlag = false;
 
 class dashboardPage {
     constructor($body){
         this.$body = $body;
+        this.data = {
+            datasets: [
+                {
+                    label: 'query',
+                    data: [10, 20, 30, 40,50,50,70],
+                    // this dataset is drawn below
+                    order: 1,
+                    type: 'bar'
+                },
+                {
+                    label: 'photos',
+                    data: [10, 20, 30, 40,50,50,70],
+                    // this dataset is drawn below
+                    order: 2,
+                    type: 'bar'
+                },
+        
+            ],
+            labels: ['일','월', '화', '수', '목','금','토']
+        }
+    }
+    
+    setState(){
+        callbackFlag = false
+        return this.db_interact() // 로딩 화면을 띄워야 함.
     }
 
+    db_interact(){
+        timer = setInterval(async () => {
+            if(!callbackFlag){
+                let result = await (async function() {
+                    let db = db_conn()
+                    
+                    let new_data = {}
+                    new_data.datasets=[]
+                    new_data.labels = ['월', '화', '수', '목','금','토','일']
+                    
+                    for (let idx=0;idx<7;idx++){
+                        let query = `select name,count, SUM(ROUND((julianday(end_time)-JULIANDAY(start_time))* 86400/60)) AS difference from process where date = '${year}-${month}-${week_date+idx}' group by name order by difference desc limit 5;`
+                        let duplicate = false
+                        let results = await db_comm(db,'SELECT',query)
+                        results.forEach((result,index) => {
+                            new_data.datasets.forEach((data)=>{
+                                if (data.label == result.name){
+                                    duplicate = true
+                                }
+                            })
+                            console.log(duplicate)
+                            if (!duplicate){
+                                new_data.datasets.push({
+                                    label : `${result.name}`, data: [0,0,0,0,0,0,0], order : index, type : 'bar'
+                                })
+                            }
+                            new_data.datasets[index].data[idx] = result.difference
+                        })
+                    }
+        
+                    db_disconn(db)
+                    return new_data
+                
+                })(); 
+        
+                this.data = result
+                this.render();
+            }    
+        }, 3000)
+        return timer
+    }
+
+    
     render(){
         /*
             스크린 타임 요약 컴포넌트 (ScreenTime)
@@ -39,11 +96,11 @@ class dashboardPage {
             most used 컴포넌트(MostUsed)
         */
         console.log('dashboard render')
- 
+        this.$body.innerHTML = '';
         const div = background(this.$body);
         header(div); // 헤더 출력
 
-        ScreenTime(div) // 스크린 타임 컴포넌트 출력
+        ScreenTime(div,this.data) // 스크린 타임 컴포넌트 출력
 
         most_used(div) // most used 컴포넌트 출력
 
@@ -52,8 +109,7 @@ class dashboardPage {
 }
 
 
-function ScreenTime($div){
-
+function ScreenTime($div,data){
     // 스크린 타임 컴포넌트
     const header = document.createElement('div');
     header.setAttribute("class","header")

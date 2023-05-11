@@ -6,7 +6,7 @@ const app = document.getElementById('app');
 const main = new mainPages(app);
 const detail = new detailPages(app);
 const dashboard = new dashboardPage(app);
-
+let val;
 class IndexView {
     constructor(){
         this.init();
@@ -19,24 +19,29 @@ class IndexView {
     
     // hash 경로 변경시, 이벤트 핸들러
     onRouteChange(e){
+        if (val != undefined){
+            clearInterval(val) // timer 삭제 
+        };
         const hashLocation = window.location.hash.substring(1);
         app.innerHTML = ''; // hash 경로 변경시 초기화
         //console.log(hashLocation);
         this.loadContent(hashLocation);
     }
 
-
     // url 로드 함수
     loadContent(url) {
         const routes = [
             { path: '', start:() => main.setState()},
             { path: "detail", start:() => detail.render()},
-            { path: "dashboard", start:() => dashboard.render()},
+            { path: "dashboard", start:() => dashboard.setState()},
         ];
         const page = routes.find((page) => page.path === url);
         console.log(page)
-        page.start();
+        val = page.start()
     }
 }
 
 new IndexView();
+
+
+
