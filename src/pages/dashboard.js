@@ -15,6 +15,7 @@ let date = String(today.getDate()).padStart(2, "0");  // 날짜
 let week_date = getDayOfWeek(`'${year}-${month}-${date}'`)
 let timer;
 let callbackFlag = false;
+let total_time = 0;
 
 class dashboardPage {
     constructor($body){
@@ -48,6 +49,7 @@ class dashboardPage {
     }
 
     async go(){
+        let temp_total_time = 0
         if(!callbackFlag){
             let result = await (async function() {
                 let db = db_conn()
@@ -61,18 +63,28 @@ class dashboardPage {
                     let duplicate = false
                     let results = await db_comm(db,'SELECT',query)
                     results.forEach((result,index) => {
-                        new_data.datasets.forEach((data)=>{
+                        console.log('result',result)
+                        duplicate = false
+                        let dup_index = undefined
+                        temp_total_time += result.difference
+                        new_data.datasets.forEach((data,index)=>{
                             if (data.label == result.name){
                                 duplicate = true
+                                dup_index = index
                             }
                         })
-                        console.log(duplicate)
                         if (!duplicate){
+                            console.log(new_data.datasets)
                             new_data.datasets.push({
                                 label : `${result.name}`, data: [0,0,0,0,0,0,0], order : index, type : 'bar'
                             })
+                            new_data.datasets[new_data.datasets.length-1].data[idx-1] = result.difference
                         }
-                        new_data.datasets[index].data[idx] = result.difference
+                        if (dup_index != undefined) {
+                            new_data.datasets[dup_index].data[idx-1] = result.difference
+                        }
+                        //console.log('data',new_data.datasets[index])
+
                     })
                 }
     
@@ -80,7 +92,7 @@ class dashboardPage {
                 return new_data
             
             })(); 
-    
+            total_time = temp_total_time
             this.data = result
             this.render();
         }    
@@ -99,10 +111,10 @@ class dashboardPage {
         */
         console.log('dashboard render')
         this.$body.innerHTML = '';
-        const div = background(this.$body);
+        const div = background(this.$body,total_time);
         header(div); // 헤더 출력
 
-        ScreenTime(div,this.data) // 스크린 타임 컴포넌트 출력
+        ScreenTime(div,this.data,total_time) // 스크린 타임 컴포넌트 출력
 
         most_used(div) // most used 컴포넌트 출력
 
@@ -111,7 +123,7 @@ class dashboardPage {
 }
 
 
-function ScreenTime($div,data){
+function ScreenTime($div,data,total_time){
     // 스크린 타임 컴포넌트
     const header = document.createElement('div');
     header.setAttribute("class","header")
@@ -135,7 +147,7 @@ function ScreenTime($div,data){
 
     const footer = document.createElement('div');
     footer.setAttribute("class","footer")
-    footer.innerHTML = '총 스크린 타임 :'
+    footer.innerHTML = `총 스크린 타임 : ${total_time} min`
 
     const ScreenTime = box($div,'일간 사용량',[header,mychart,footer],'총 사용량');
     //ScreenTime.style.border = 'solid'

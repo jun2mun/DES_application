@@ -56,11 +56,15 @@ function box($body,title=null,content=null,comment=null){
 
 
     if (comment != null){
+        let today = new Date();
+        let hours = String(today.getHours()).padStart(2, "0"); // 시
+        let minutes = String(today.getMinutes()).padStart(2, "0");  // 분
+        //let seconds = String(today.getSeconds()).padStart(2, "0");  // 초
         const box_comment = document.createElement("div")
         box_comment.setAttribute("class","box_comment")
         box_comment.style.paddingLeft = '10px'
         box_comment.style.fontSize = '10px'
-        box_comment.innerHTML = '오늘 오후 6:49 업데이트 됨'
+        box_comment.innerHTML = `오늘 ${hours}:${minutes} 업데이트 됨`
         div.appendChild(box_comment)
     }
 
