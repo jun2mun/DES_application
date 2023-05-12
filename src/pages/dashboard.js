@@ -1,3 +1,5 @@
+// 포어그라운드 전환이 이루어지지 않으면, db query가 진행되지 않아서 현재 사용하는 시간 update 안됨 //
+
 const {header} = require('../components/header.js')
 const {background} = require('../components/background.js');
 const {box} = require('../components/box.js');
@@ -127,7 +129,20 @@ function ScreenTime($div,data,total_time){
     // 스크린 타임 컴포넌트
     const header = document.createElement('div');
     header.setAttribute("class","header")
-    header.innerHTML = '일일 평균<br/>2분'
+    let week = [0,0,0,0,0,0,0]; let usage_day = 0;
+    data.datasets.forEach((result,index) => {
+        result.data.forEach((data,idx)=>{
+            console.log(idx,data)
+            week[idx] += data
+        })
+    })
+    week.forEach((day)=>{
+        if (day != 0){
+            usage_day +=1
+        }
+    })
+
+    header.innerHTML = `일일 평균<br/>${total_time/usage_day}분`
 
     const mychart = document.createElement('canvas');
     mychart.setAttribute('id','myChart')

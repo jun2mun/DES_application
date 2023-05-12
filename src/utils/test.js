@@ -1,24 +1,5 @@
-data = {
-    datasets: [
-        {
-            label: 'query',
-            data: [10, 20, 30, 40,50,50,70],
-            // this dataset is drawn below
-            order: 1,
-            type: 'bar'
-        },
-        {
-            label: 'photos',
-            data: [10, 20, 30, 40,50,50,70],
-            // this dataset is drawn below
-            order: 2,
-            type: 'bar'
-        },
-
-    ],
-    labels: ['월', '화', '수', '목','금','토','일']
+new_data = {}
+new_data.datasets ={
+    label : `${'test'}`, data: (new Array(10)).fill(0), type : 'bar'
 }
-
-
-let new_data =  {...data};
-console.log(new_data.labels)
+console.log(new_data)

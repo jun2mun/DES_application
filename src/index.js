@@ -32,7 +32,7 @@ class IndexView {
     loadContent(url) {
         const routes = [
             { path: '', start:() => main.setState()},
-            { path: "detail", start:() => detail.render()},
+            { path: "detail", start:() => detail.setState()},
             { path: "dashboard", start:() => dashboard.setState()},
         ];
         const page = routes.find((page) => page.path === url);
