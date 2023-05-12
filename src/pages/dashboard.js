@@ -63,7 +63,7 @@ class dashboardPage {
                     let duplicate = false
                     let results = await db_comm(db,'SELECT',query)
                     results.forEach((result,index) => {
-                        console.log('result',result)
+                        //console.log('result',result)
                         duplicate = false
                         let dup_index = undefined
                         temp_total_time += result.difference
@@ -74,7 +74,7 @@ class dashboardPage {
                             }
                         })
                         if (!duplicate){
-                            console.log(new_data.datasets)
+                            //console.log(new_data.datasets)
                             new_data.datasets.push({
                                 label : `${result.name}`, data: [0,0,0,0,0,0,0], order : index, type : 'bar'
                             })
@@ -116,7 +116,7 @@ class dashboardPage {
 
         ScreenTime(div,this.data,total_time) // 스크린 타임 컴포넌트 출력
 
-        most_used(div) // most used 컴포넌트 출력
+        most_used(div,this.data) // most used 컴포넌트 출력
 
     }
 
@@ -157,22 +157,20 @@ function ScreenTime($div,data,total_time){
 }
 
 // mout used 컴포넌트
-function most_used($div){
+function most_used($div,data){
+    console.log('most used',data)
     const MostUsed = box($div,'MOST USED');
-
-    const dataset = [
-        { icon : './public/assets/icon.svg', title : 'notabilty', progressbar : 11},
-        
-        { icon : './public/assets/icon.svg', title : 'photos', progressbar : 22},
-        
-        { icon : './public/assets/icon.svg', title : 'mail', progressbar : 33},
-        
-        { icon : './public/assets/icon.svg', title : 'vscode', progressbar : 44},
-        
-        { icon : './public/assets/icon.svg', title : 'chrome', progressbar : 55}
-    ] // 테스트 데이터셋
+    const dataset = []
+    for (let i =0; i <3; i ++){
+        let cal = data.datasets[i].data.reduce((sum, num) => sum + num);
+        dataset.push(
+            { icon : './public/assets/icon.svg', title : `${data.datasets[i].label}`, progressbar :`${cal}`,cnt : `${cal}` },
+        )
+    }
 
     for (let i = 0;i < 3; i++){
+
+
         const element = document.createElement('div');
         const icon = document.createElement('img');
         icon.src = dataset[i]['icon']
@@ -184,7 +182,7 @@ function most_used($div){
         
         const bar = document.createElement('progress');
         bar.max='100'; bar.value= dataset[i]['progressbar']
-        const use_time = document.createTextNode('2h 32m')
+        const use_time = document.createTextNode(` ${dataset[i].cnt} min`)
 
         contents.appendChild(content_title)
         content_detail.appendChild(bar)
