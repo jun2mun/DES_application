@@ -23,21 +23,31 @@ class IndexView {
             clearInterval(val) // timer 삭제 
         };
         const hashLocation = window.location.hash.substring(1);
+        console.log('route change',hashLocation)
         app.innerHTML = ''; // hash 경로 변경시 초기화
         //console.log(hashLocation);
         this.loadContent(hashLocation);
     }
 
     // url 로드 함수
+
     loadContent(url) {
         const routes = [
-            { path: '', start:() => main.setState()},
-            { path: "detail", start:() => detail.setState()},
-            { path: "dashboard", start:() => dashboard.setState()},
+            { path: /detail/, start:() => detail.setState(url)},
+            { path: /dashboard/, start:() => dashboard.setState()},
         ];
-        const page = routes.find((page) => page.path === url);
-        console.log(page)
-        val = page.start()
+        const page = routes.find((page) => 
+            page.path.test(url) == true
+        );
+        console.log('page',page)
+        if (url === ''){
+            main.setState()
+        }
+        else{
+            console.log(page)
+            val = page.start()
+        }
+
     }
 }
 

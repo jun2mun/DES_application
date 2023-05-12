@@ -12,9 +12,11 @@ let year = today.getFullYear(); // 년도
 let month = String(today.getMonth() + 1).padStart(2, "0");  // 월
 let date = String(today.getDate()).padStart(2, "0");  // 날짜
 let week_date = getDayOfWeek(`'${year}-${month}-${date}'`)
-console.log('detail',week_date)
+
+
 let timer;
 let total_time = 0;
+
 
 const data2 = {
     datasets: [
@@ -28,6 +30,7 @@ const data2 = {
 ],
     labels: ['0분', '30', '60', '90','120','150','180분']
 }
+
 
 class detailPages {
     constructor($body){
@@ -52,14 +55,27 @@ class detailPages {
             ],
             labels: ['일','월', '화', '수', '목','금','토']
         }
+        this.route = ''
+    }
+    async init(){
+        let route = await window.location.hash.substring(1).split('#')[1]
+        return new Promise(function(resolve,reject){
+            resolve(route)
+        })
     }
     setState(){
         callbackFlag = false
-        this.go(); // 즉시 실행
+        this.init().then((result) =>{
+            console.log(result)
+            this.go(result)
+        })
+
+        
         return this.db_interact() // 로딩 화면을 띄워야 함.
     }
 
-    async go(){
+    async go(val){
+        // 이 방법으로 hash 값 전달 안해야함.
         let temp_total_time = 0
         if(!callbackFlag){
             let result = await (async function() {
@@ -68,21 +84,19 @@ class detailPages {
                 let new_data = {}
                 new_data.datasets=[]
                 new_data.labels = ['0', '2', '4', '8','10','12','14','16','18','20','22','24']
-                new_data.datasets ={
-                    label : `${'test'}`, data: (new Array(12)).fill(0), type : 'bar'
-                }
+                new_data.datasets =[
+                    {label : `${'test'}`, data: (new Array(12)).fill(0), type : 'bar'}
+                ]
 
                 for (let idx=0;idx<11;idx++){
-                    let query = `select name,count, SUM(ROUND((julianday(end_time)-JULIANDAY(start_time))* 86400/60)) AS difference from process where date = '${year}-${month}-${date}' and name = 'Code.exe' and CAST(strftime('%H',start_time) AS integer) between ${new_data.labels[idx]} and  ${new_data.labels[idx+1]};`
+                    let query = `select name,count, SUM(ROUND((julianday(end_time)-JULIANDAY(start_time))* 86400/60)) AS difference from process where date = '${year}-${month}-${date}' and name = '${val}' and CAST(strftime('%H',start_time) AS integer) between ${new_data.labels[idx]} and  ${new_data.labels[idx+1]};`
 
-                    console.log(query)
                     let results = await db_comm(db,'SELECT',query)
-                    console.log('결과',results)
-                    if (results.difference == undefined){
-                        new_data.datasets.data[idx] = 0   
+                    if (results[0].difference === null){
+                        new_data.datasets[0].data[idx] = 0   
                     }
                     else{
-                        new_data.datasets.data[idx] = results.difference   
+                        new_data.datasets[0].data[idx] = results[0].difference
                     }
                                      
                 }
@@ -116,12 +130,12 @@ class detailPages {
 
 
 function ScreenTime($div,name,char_data){
-    console.log('screen',char_data)
 
     // 스크린 타임 컴포넌트
+    let cal = char_data.datasets[0].data.reduce((sum, num) => sum + num);
     const header = document.createElement('div');
     header.setAttribute("class","header")
-    header.innerHTML = `${char_data}분`
+    header.innerHTML = `${cal}분`
 
     const mychart = document.createElement('canvas');
     mychart.setAttribute('id',`${name}`)

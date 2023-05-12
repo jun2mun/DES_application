@@ -7,7 +7,7 @@ function button($body,text='button',path=''){
     $body.appendChild(button);
 
     button.addEventListener("click", (e) => {
-        const href = window.location.href = '#detail';
+        const href = window.location.href = path;
         console.log(href);
     })
 }

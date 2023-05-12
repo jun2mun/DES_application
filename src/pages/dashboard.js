@@ -132,7 +132,6 @@ function ScreenTime($div,data,total_time){
     let week = [0,0,0,0,0,0,0]; let usage_day = 0;
     data.datasets.forEach((result,index) => {
         result.data.forEach((data,idx)=>{
-            console.log(idx,data)
             week[idx] += data
         })
     })
@@ -173,7 +172,6 @@ function ScreenTime($div,data,total_time){
 
 // mout used 컴포넌트
 function most_used($div,data){
-    console.log('most used',data)
     const MostUsed = box($div,'MOST USED');
     const dataset = []
     for (let i =0; i <3; i ++){
@@ -206,7 +204,7 @@ function most_used($div,data){
         element.appendChild(icon)
         element.appendChild(contents)
 
-        button(element,`>`,'#detail')
+        button(element,`>`,`#detail#${dataset[i]['title']}`)
         MostUsed.appendChild(element)
         element.style.background = 'white'
         element.style.borderRadius = '3%';
