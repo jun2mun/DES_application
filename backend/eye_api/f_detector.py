@@ -13,7 +13,7 @@ class eye_blink_detector():
         # cargar modelo para deteccion de puntos de ojos
         #self.predictor_eyes = dlib.shape_predictor(os.getcwd()+cfg.eye_landmarks)
         
-        self.predictor_eyes = dlib.shape_predictor(cfg.eye_landmarks)
+        self.predictor_eyes = dlib.shape_predictor('C:/Users/owner/Desktop/portfolio/eye_electron_app/backend/eye_api/model_landmarks/shape_predictor_68_face_landmarks.dat')
     def eye_blink(self,gray,rect,COUNTER,TOTAL):
         (lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
         (rStart, rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
