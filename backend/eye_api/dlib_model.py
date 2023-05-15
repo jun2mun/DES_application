@@ -85,7 +85,7 @@ class blink_detection_model(object):
                 self.COUNTER,self.TOTAL = detector.eye_blink(gray,rectangles,self.COUNTER,self.TOTAL)
             
             else:
-                img_post = im 
+                img_post = im
             print(self.TOTAL)
             
     def _get(self):

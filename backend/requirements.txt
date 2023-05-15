@@ -7,4 +7,5 @@ opencv-python
 flask
 requests
 pysqlite3
+socektio
 # 3.11.2

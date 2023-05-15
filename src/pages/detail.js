@@ -66,15 +66,16 @@ class detailPages {
     setState(){
         callbackFlag = false
         this.init().then((result) =>{
-            console.log(result)
+            
             this.go(result)
+            this.db_interact(result)
         })
 
-        
-        return this.db_interact() // 로딩 화면을 띄워야 함.
+
     }
 
     async go(val){
+        //console.log('update-------------------')
         // 이 방법으로 hash 값 전달 안해야함.
         let temp_total_time = 0
         if(!callbackFlag){
@@ -83,13 +84,13 @@ class detailPages {
 
                 let new_data = {}
                 new_data.datasets=[]
-                new_data.labels = ['0', '2', '4', '8','10','12','14','16','18','20','22','24']
+                new_data.labels = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24']
                 new_data.datasets =[
-                    {label : `${'test'}`, data: (new Array(12)).fill(0), type : 'bar'}
+                    {label : `${val}`, data: (new Array(24)).fill(0), type : 'bar'}
                 ]
 
-                for (let idx=0;idx<11;idx++){
-                    let query = `select name,count, SUM(ROUND((julianday(end_time)-JULIANDAY(start_time))* 86400/60)) AS difference from process where date = '${year}-${month}-${date}' and name = '${val}' and CAST(strftime('%H',start_time) AS integer) between ${new_data.labels[idx]} and  ${new_data.labels[idx+1]};`
+                for (let idx=0;idx<23;idx++){
+                    let query = `select name,count, SUM(ROUND((julianday(end_time)-JULIANDAY(start_time))* 86400/60)) AS difference from process where date = '${year}-${month}-${date}' and name = '${val}' and CAST(strftime('%H',start_time) AS integer) between ${new_data.labels[idx]} and ${new_data.labels[idx]};` // idx +1 에서 수정
 
                     let results = await db_comm(db,'SELECT',query)
                     if (results[0].difference === null){
@@ -104,13 +105,14 @@ class detailPages {
                 return new_data
             
             })(); 
+            console.log("detail page",result)
             total_time = temp_total_time
             this.data = result
             this.render();
         }    
     }
-    db_interact(){
-        timer = setInterval(()=>this.go(), 10000)
+    db_interact(val){
+        timer = setInterval(()=>this.go(val), 10000)
         return timer
     }
 
