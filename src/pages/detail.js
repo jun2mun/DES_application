@@ -17,21 +17,6 @@ let week_date = getDayOfWeek(`'${year}-${month}-${date}'`)
 let timer;
 let total_time = 0;
 
-
-const data2 = {
-    datasets: [
-    {
-        label: '눈 깜박임 증가도',
-        data: [10, 20, 30, 40,50,50,70],
-        // this dataset is drawn below
-        order: 2,
-        type: 'line'
-    },
-],
-    labels: ['0분', '30', '60', '90','120','150','180분']
-}
-
-
 class detailPages {
     constructor($body){
         this.$body = $body;
@@ -82,11 +67,12 @@ class detailPages {
             let result = await (async function() {
                 let db = db_conn()
 
-                let new_data = {}
+                let new_data = {};  let new_data2 = {}
                 new_data.datasets=[]
-                new_data.labels = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24']
+                new_data.labels = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23']
                 new_data.datasets =[
-                    {label : `${val}`, data: (new Array(24)).fill(0), type : 'bar'}
+                    {label : `${val}`, data: (new Array(24)).fill(0), type : 'bar',yAxisID:'A'},
+                    {label : `${val}`, data: (new Array(24)).fill(0), type : 'line',yAxisID:'B'}
                 ]
 
                 for (let idx=0;idx<23;idx++){
@@ -94,11 +80,18 @@ class detailPages {
 
                     let results = await db_comm(db,'SELECT',query)
                     if (results[0].difference === null){
-                        new_data.datasets[0].data[idx] = 0   
+                        new_data.datasets[0].data[idx] = 0
                     }
                     else{
                         new_data.datasets[0].data[idx] = results[0].difference
                     }
+                    if (results[0].count === null){
+                        new_data.datasets[1].data[idx] = 0
+                    }
+                    else{
+                        new_data.datasets[1].data[idx] = results[0].count
+                    }
+                    
                                      
                 }
                 db_disconn(db)
@@ -126,7 +119,7 @@ class detailPages {
 
         ScreenTime(div,'screen',this.data) // 앱 사용시간 컴포넌트
 
-        Eyegradient(div,'count',data2) // 눈 깜박임 컴포넌트
+        Eyegradient(div,'count',this.data) // 눈 깜박임 컴포넌트
     }
 }
 
@@ -150,17 +143,11 @@ function ScreenTime($div,name,char_data){
 
     const ScreenTime = box($div,'일간 사용량',[header,mychart,footer],'총 사용량');
     //ScreenTime.style.border = 'solid'
-
-
     return ScreenTime
-
-
-
-    
 }
 
 function Eyegradient($div,name,char_data=null){
-
+    console.log(char_data)
     // 스크린 타임 컴포넌트
     const header = document.createElement('div');
     header.setAttribute("class","header")

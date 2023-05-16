@@ -4,7 +4,6 @@ dlib
 numpy
 scipy
 opencv-python
-flask
 requests
 pysqlite3
 socektio
