@@ -18,7 +18,7 @@ import numpy as np
 
 import queue
 import threading
-test = queue.Queue()
+cur_cnt = 0
 def socket_test():
     # instantiate a socket object
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -37,30 +37,25 @@ def socket_test():
     return conn
 
 def socket_recv(conn):
-
+    global cur_cnt
     print('socket accepted, got connection object')
     while 1:
         print("waiting recv data")
         data = conn.recv(1024)
         if data.decode('utf-8') == "start":
-            print(data)
-            sendTextViaSocket('message',conn)
+            print('count : ',cur_cnt)
+            sendTextViaSocket(f'{cur_cnt}',conn)
         time.sleep(1)
 
 
 
 
-def camera(queue):
-    print("camera",queue.get())
-    model = blink_detection_model()
-    # instancio detector
-    detector = f_detector.eye_blink_detector()
-    # iniciar variables para el detector de parapadeo
-
+def camera():
+    global cur_cnt
+    
     COUNTER = 0
     TOTAL = 0
 
-    vs = VideoStream(src=0).start()
 
 
     while True:
@@ -85,6 +80,8 @@ def camera(queue):
         else:
             img_post = im
         print("count : " ,TOTAL)
+        cur_cnt = TOTAL
+
 
 
 
@@ -123,15 +120,18 @@ def while_test():
     
 
 if __name__ == '__main__':
-    print('-1')
+    print('camera loading...')
+    model = blink_detection_model()
+    # instancio detector
+    detector = f_detector.eye_blink_detector()
+    # iniciar variables para el detector de parapadeo
+    vs = VideoStream(src=0).start()
+    print('camera loaded!!')
+    print('socket conn waiting')
     conn = socket_test()
-    print('0')
+    print('socket connected!!')
     t1 = threading.Thread(target=socket_recv,args=(conn,))
     #t1 = threading.Thread(target=while_test1)
-    print('1')
     t2 = threading.Thread(target=camera)
-    print('2')
     t1.start()
-    print('3')
     t2.start()
-    print('4')
