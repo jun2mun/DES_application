@@ -1,3 +1,10 @@
+const readline = require("readline");
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
+
+
 var net = require('net');
 
 var options = { // 접속 정보 설정
@@ -7,6 +14,11 @@ var options = { // 접속 정보 설정
 
 var client = net.connect(options, () => { // 서버 접속
   console.log("connected");
+    rl.on("line", (line) => {
+      console.log("input: ", line);
+      client.write(line);
+      //rl.close();
+    });
 });
 
 client.on('data', (data) => { // 데이터 수신 이벤트

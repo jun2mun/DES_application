@@ -9,7 +9,6 @@ PORT = 65439
 
 ###################################
   #### eye detection library ####
-ACK_TEXT = 'text_received'
 from imutils.video import VideoStream
 import cv2
 from eye_api.dlib_model import blink_detection_model
