@@ -1,11 +1,11 @@
 
 // main.js
 const path = require('path');
-/*
+
 let child = require('child_process').execFile;
 let executablePath = (path.join(__dirname, path.sep+'backend/main.exe').replace(path.sep+'app.asar', '').replace('\\src\\utils\\','/')).replace('\\','/');
 console.log(executablePath)
-child(executablePath, function(err, data) {
+let sub_process = child(executablePath, function(err, data) {
   console.log(executablePath)
     if(err){
        console.error(err);
@@ -13,7 +13,7 @@ child(executablePath, function(err, data) {
     }
     console.log("exe start");
 });
-*/
+
 
 
 // Modules to control application life and create native browser window
@@ -57,6 +57,7 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
   client.write('close')
+  sub_process.kill('SIGINT')
 })
 
 // In this file you can include the rest of your app's specific main process
@@ -83,6 +84,7 @@ var options = { // 접속 정보 설정
 
 var client = net.connect(options, () => { // 서버 접속
   console.log("connected");
+  yes_client()
 });
 
 
