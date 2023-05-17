@@ -1,9 +1,22 @@
 
 // main.js
+const path = require('path');
+let child = require('child_process').execFile;
+let executablePath = (path.join(__dirname, path.sep+'backend/main.exe').replace(path.sep+'app.asar', '').replace('\\src\\utils\\','/')).replace('\\','/');
+console.log(executablePath)
+child(executablePath, function(err, data) {
+  console.log(executablePath)
+    if(err){
+       console.error(err);
+       return;
+    }
+    console.log("exe start");
+});
+
+
 
 // Modules to control application life and create native browser window
 const { app, BrowserWindow } = require('electron')
-const path = require('path') // preload.js 위한 패키지
 const ffi = require('ffi-napi') // 외부 모듈 사용 위한 패키지
 
 const createWindow = () => {

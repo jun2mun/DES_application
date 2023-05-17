@@ -6,6 +6,7 @@
   "author": "Jun Beom Lee",
   "description": "eye strain detect",
   "scripts": {
+    "test" : "electron . && backend/main.exe",
     "start": "electron .",
     "package": "electron-forge package",
     "make": "electron-forge make",
@@ -46,7 +47,7 @@
     "productName": "HelloElectron",
     "appId": "com.electron.hello",
     "asar": true,
-    "extraResources": ["test.db"],
+    "extraResources": ["test.db","backend"],
     "protocols" : {
         "name" : "helloElectron",
         "schemes" : ["helloelectron"]
