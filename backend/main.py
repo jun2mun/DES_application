@@ -68,6 +68,7 @@ def socket_func(sock,conn):
                         sendTextViaSocket(f'camera loading',conn) # 카메라 없으면 그때 동안은 0(카메라 없음)으로 측정
             elif data.decode('utf-8') == "close":
                 print("close request")
+                sendTextViaSocket(f'close request',conn)
                 process_on = False
                 sys.exit()
             time.sleep(1)
