@@ -34,9 +34,9 @@ def socket_test():
 
     # accept the socket response from the client, and get the connection object
     conn, addr = sock.accept()    # Note: execution waits here until the client calls sock.connect()
-    return conn
+    return sock,conn
 
-def socket_recv(conn):
+def socket_recv(sock,conn):
     global cur_cnt
     print('socket accepted, got connection object')
     while 1:
@@ -45,6 +45,8 @@ def socket_recv(conn):
         if data.decode('utf-8') == "start":
             print('count : ',cur_cnt)
             sendTextViaSocket(f'{cur_cnt}',conn)
+        elif data.decode('utf-8') == "close":
+            exit()
         time.sleep(1)
 
 
@@ -128,9 +130,9 @@ if __name__ == '__main__':
     vs = VideoStream(src=0).start()
     print('camera loaded!!')
     print('socket conn waiting')
-    conn = socket_test()
+    sock,conn = socket_test()
     print('socket connected!!')
-    t1 = threading.Thread(target=socket_recv,args=(conn,))
+    t1 = threading.Thread(target=socket_recv,args=(sock,conn,))
     #t1 = threading.Thread(target=while_test1)
     t2 = threading.Thread(target=camera)
     t1.start()
