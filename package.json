@@ -44,13 +44,13 @@
     "electron-builder": "^23.6.0"
   },
   "build": {
-    "productName": "HelloElectron",
-    "appId": "com.electron.hello",
+    "productName": "Eye_fatigure_detection",
+    "appId": "com.electron.Eye_fatigure_detection",
     "asar": true,
     "extraResources": ["test.db","backend"],
     "protocols" : {
-        "name" : "helloElectron",
-        "schemes" : ["helloelectron"]
+        "name" : "Eye_fatigure_detection",
+        "schemes" : ["Eye_fatigure_detection"]
     },
     "mac": {
       "target": [
@@ -59,7 +59,7 @@
       "icon": "./resources/installer/Icon.icns"
     },
     "dmg": {
-      "title": "HelloElectron",
+      "title": "Eye_fatigure_detection",
       "icon": "./resources/installer/Icon.icns"
     },
     "win": {
