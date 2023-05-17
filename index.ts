@@ -1,6 +1,7 @@
 
 // main.js
 const path = require('path');
+/*
 let child = require('child_process').execFile;
 let executablePath = (path.join(__dirname, path.sep+'backend/main.exe').replace(path.sep+'app.asar', '').replace('\\src\\utils\\','/')).replace('\\','/');
 console.log(executablePath)
@@ -12,7 +13,7 @@ child(executablePath, function(err, data) {
     }
     console.log("exe start");
 });
-
+*/
 
 
 // Modules to control application life and create native browser window
@@ -55,6 +56,7 @@ app.whenReady().then(() => {
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
+  client.write('close')
 })
 
 // In this file you can include the rest of your app's specific main process
@@ -117,20 +119,28 @@ client.on('error',(err) => {
     client_on = false
     console.log('에러 발생 : ',err)
     // 에러 발생 시(눈탐지 서비스 다운시), 어떻게 해야 할지 TODO
-    pid_monitor()
   } catch (error) {
     console.log(error)
   }
 })
+pid_monitor()
 
 async function pid_monitor(){
   setInterval(() => {
     console.log('--1 sec --');
     if (client_on) {
+      console.log("client ok")
       client.write('start') // 이벤트 전달
     }
     else {
-      console.log('hi no client case')
+      client.on('end', () => { // 접속 종료
+        console.log("disconnected");
+      });
+      client = net.connect(options, () => { // 서버 접속
+        client_on = true
+        console.log("connected");
+      });
+      console.log('no client')
       let [name,pid] = getCurrentForegroundProcess();
       name = name.split('\\')
       name = name[name.length-1] + 'e'
@@ -165,6 +175,7 @@ async function pid_monitor(){
 }
 
 client.on('data', (data) => { // 데이터 수신 이벤트
+  console.log('data recv')
   let [name,pid] = getCurrentForegroundProcess();
   name = name.split('\\')
   name = name[name.length-1] + 'e'
@@ -198,9 +209,6 @@ client.on('data', (data) => { // 데이터 수신 이벤트
 });
 
 
-client.on('end', () => { // 접속 종료
-  console.log("disconnected");
-});
 
 
 
