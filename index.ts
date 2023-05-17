@@ -98,24 +98,59 @@ let seconds = String(today.getSeconds()).padStart(2, "0");  // 초
 let prev_time = `${hours}:${minutes}:${seconds}`
 
 let pre_eye_cnt = 0;
-
+let client_on = true
 client.on('error',(err) => {
   try {
+    client_on = false
     console.log('에러 발생 : ',err)
     // 에러 발생 시(눈탐지 서비스 다운시), 어떻게 해야 할지 TODO
+    pid_monitor()
   } catch (error) {
     console.log(error)
   }
 })
 
-
 async function pid_monitor(){
   setInterval(() => {
     console.log('--1 sec --');
-    client.write('start') // 이벤트 전달
-        // Example usage:
+    if (client_on) {
+      client.write('start') // 이벤트 전달
+    }
+    else {
+      console.log('hi no client case')
+      let [name,pid] = getCurrentForegroundProcess();
+      name = name.split('\\')
+      name = name[name.length-1] + 'e'
+
+      if (prev_pid !== pid && prev_pid !== '') {
+        console.log('--- pid change ---')
+        let today = new Date();
+        let year = today.getFullYear(); // 년도
+        let month = String(today.getMonth() + 1).padStart(2, "0");  // 월
+        let date = String(today.getDate()).padStart(2, "0");  // 날짜
+        let hours = String(today.getHours()).padStart(2, "0"); // 시
+        let minutes = String(today.getMinutes()).padStart(2, "0");  // 분
+        let seconds = String(today.getSeconds()).padStart(2, "0");  // 초
+        let cur_time = `${hours}:${minutes}:${seconds}`
+        let db = db_conn()
+        let query = `INSERT INTO process (name,start_time,end_time,count,date) VALUES ('${prev_name}','${prev_time}','${cur_time}',${0},'${year}-${month}-${date}')`
+        console.log('query',query)
+        prev_pid = pid
+        prev_name = name
+        prev_time = cur_time
+        db_comm(db,'INSERT',query)
+        db_disconn(db)
+      }
+      if (prev_pid == ''){
+        // 처음 시작하면
+        prev_pid = pid
+        prev_name = name
+      }
+        }
+
     }, 1000)
 }
+
 client.on('data', (data) => { // 데이터 수신 이벤트
   let [name,pid] = getCurrentForegroundProcess();
   name = name.split('\\')
@@ -146,7 +181,7 @@ client.on('data', (data) => { // 데이터 수신 이벤트
     // 처음 시작하면
     prev_pid = pid
     prev_name = name
-  }   
+  }
 });
 
 
