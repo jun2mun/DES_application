@@ -6,6 +6,8 @@ const app = document.getElementById('app');
 const main = new mainPages(app);
 const detail = new detailPages(app);
 const dashboard = new dashboardPage(app);
+
+const {ipcRenderer} = require('electron');
 let val;
 class IndexView {
     constructor(){

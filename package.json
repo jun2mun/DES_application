@@ -1,7 +1,7 @@
 {
   "name": "eyeapp",
   "version": "1.0.0",
-  "main": "index.ts",
+  "main": "index.js",
   "license": "MIT",
   "author": "Jun Beom Lee",
   "description": "eye strain detect",

@@ -4,21 +4,38 @@ const path = require('path');
 
 let child = require('child_process').execFile;
 let executablePath = (path.join(__dirname, path.sep+'backend/main.exe').replace(path.sep+'app.asar', '').replace('\\src\\utils\\','/')).replace('\\','/');
-console.log(executablePath)
 let sub_process = child(executablePath, function(err, data) {
-  console.log(executablePath)
+  console.log(executablePath, "start")
     if(err){
        console.error(err);
        return;
     }
-    console.log("exe start");
 });
+
+
+const { Notification } = require('electron');
+
+// 알림 메소드
+function showNotification (conn) {
+  if (conn == true){
+    new Notification({ title: 'network connected', body: '카메라 서비스와 연결되었습니다.' }).show()
+  }
+  else{
+    new Notification({ title: 'network disconnected', body: '카메라 서비스와 연결이 끊겼습니다.' }).show()
+  }  
+}
+
+const { ipcMain } = require('electron')
+
+
 
 
 
 // Modules to control application life and create native browser window
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow} = require('electron')
 const ffi = require('ffi-napi') // 외부 모듈 사용 위한 패키지
+
+
 
 const createWindow = () => {
   // Create the browser window.
@@ -43,7 +60,6 @@ const createWindow = () => {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   createWindow()
-
   app.on('activate', () => {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
@@ -83,24 +99,12 @@ var options = { // 접속 정보 설정
 };
 
 var client = net.connect(options, () => { // 서버 접속
-  console.log("connected");
+  console.log("server connected");
   yes_client()
 });
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-console.log('client connected')
 // TODO 이벤트 핸들러 형식으로 변경
 let prev_name = '';
 let prev_pid = '';
@@ -127,10 +131,18 @@ client.on('error',(err) => {
     //console.log(error)
   }
 })
-
+// ipcMain에서의 이벤트 수신
+ipcMain.on('main', (evt, payload) => {
+  console.log('ipcMain',client_on)
+  if (client_on == true){
+    evt.reply('camera_check', 'conn')
+  }
+  else{
+    evt.reply('camera_check', 'disconn')
+  }
+})
 
 async function yes_client(){
-  console.log('yes_client')
   let yes_client_timer = setInterval(()=>{
     if (client_on){
       console.log("link with socket server")
@@ -143,6 +155,7 @@ async function yes_client(){
   },1000 )
   client.on('error',(err) => {
     try {
+      showNotification(false)
       client_on = false
       console.log('cannot access to socket server')
       //console.log('에러 발생 : ',err)
@@ -190,9 +203,8 @@ async function yes_client(){
 
 function no_client(){
   let socket_timer = setInterval(() => {
-    console.log('--1 sec --');
     if (client_on) {
-      console.log("link with socket server")
+      showNotification(true)
       clearInterval(socket_timer)
       yes_client()
     }
@@ -205,10 +217,8 @@ function no_client(){
         try {
           client_on = false
           console.log('cannot access to socket server')
-          //console.log('에러 발생 : ',err)
           // 에러 발생 시(눈탐지 서비스 다운시), 어떻게 해야 할지 TODO
         } catch (error) {      
-          //console.log(error)
         }
       })
       
