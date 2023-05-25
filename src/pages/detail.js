@@ -67,7 +67,7 @@ class detailPages {
         this.init().then((result) =>{
             
             this.go(result)
-            this.db_interact(result)
+            return this.db_interact(result)
         })
 
 

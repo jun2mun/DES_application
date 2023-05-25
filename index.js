@@ -12,6 +12,8 @@ let sub_process = child(executablePath, function(err, data) {
     }
 });
 
+let limit_alert = [0,0.4,0.7,1] // 경고 기준 TODO 변수로 해야함.
+
 
 const { Notification } = require('electron');
 
@@ -22,7 +24,7 @@ function showNotification (conn) {
   }
   else{
     new Notification({ title: 'network disconnected', body: '카메라 서비스와 연결이 끊겼습니다.' }).show()
-  }  
+  }
 }
 
 const { ipcMain } = require('electron')
@@ -141,6 +143,16 @@ ipcMain.on('main', (evt, payload) => {
     evt.reply('camera_check', 'disconn')
   }
 })
+ipcMain.on('status', (evt, payload) => {
+  console.log('ipcMain_status')
+  if (true){
+    evt.reply('status_check', 'soso')
+  }
+  else{
+    evt.reply('camera_check', 'disconn')
+  }
+})
+
 
 async function yes_client(){
   let yes_client_timer = setInterval(()=>{

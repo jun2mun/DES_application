@@ -77,7 +77,7 @@ class dashboardPage {
                 new_data.labels = ['월', '화', '수', '목','금','토','일']
                 
                 for (let idx=0;idx<7;idx++){
-                    let query = `select name,count, ROUND( SUM( ( julianday(end_time)-JULIANDAY(start_time) ) * 86400/60 ) ,1) AS difference from process where date = '${year}-${month}-${week_date+idx}' group by name order by difference desc`
+                    let query = `select name,SUM(count) as count, ROUND( SUM( ( julianday(end_time)-JULIANDAY(start_time) ) * 86400/60 ) ,1) AS difference from process where date = '${year}-${month}-${week_date+idx}' group by name order by difference desc`
                     let duplicate = false
                     let results = await db_comm(db,'SELECT',query)
 

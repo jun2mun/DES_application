@@ -43,7 +43,7 @@ class IndexView {
         );
         console.log('page',page)
         if (url === ''){
-            main.setState()
+            val = main.setState()
         }
         else{
             console.log(page)

@@ -12,6 +12,7 @@ const data = [
     { state : 'red' , src : './public/assets/red-blinking.svg'}
 ]
 let iscamera = false
+let status_img = 0
 const { ipcRenderer } = require('electron')
 
 class mainPages {
@@ -25,6 +26,7 @@ class mainPages {
         let timer = setInterval(() => {
             const payload = 'camera_check'
             ipcRenderer.send('main', payload)
+            ipcRenderer.send('status','status_check')
         }, 1000);
         ipcRenderer.on('camera_check', (evt, payload) => {
             let prevstate = iscamera
@@ -36,6 +38,22 @@ class mainPages {
             }
             if (prevstate != iscamera){
                 console.log('iscamera')
+                this.render()
+            }
+        })
+        ipcRenderer.on('status_check', (evt, payload) => {
+            let prevstate = 0
+            if (payload == 'Good'){
+                status_img = 0
+            }
+            if (payload == 'soso'){
+                status_img = 1
+            }
+            else{
+                status_img = 2
+            }
+            if (prevstate != status_img){
+                console.log('isstatus')
                 this.render()
             }
         })
@@ -74,7 +92,7 @@ class mainPages {
         // 이미지
         const img = document.createElement("img");
         img.setAttribute('id','logo')
-        img.src = data[1]['src']
+        img.src = data[status_img]['src']
         div.appendChild(img);
 
 
