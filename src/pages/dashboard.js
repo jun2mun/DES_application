@@ -143,7 +143,7 @@ class dashboardPage {
         const div = background(this.$body,total_time);
 
 
-        //header(div); // 헤더 출력
+        header(div); // 헤더 출력
 
         const camera = document.createElement("div");
         camera.style.position = 'fixed'

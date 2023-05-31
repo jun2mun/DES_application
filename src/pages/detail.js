@@ -92,7 +92,8 @@ class detailPages {
                 ]
 
                 for (let idx=0;idx<23;idx++){
-                    let query = `select name,SUM(count) as count, ROUND( SUM( ( julianday(end_time)-JULIANDAY(start_time) ) * 86400/60 ) ,1) AS difference from process where date = '${year}-${month}-${date}' and name = '${val}' and CAST(strftime('%H',start_time) AS integer) between ${new_data.labels[idx]} and ${new_data.labels[idx]};` // idx +1 에서 수정
+                    let query = `select name, ROUND( SUM(count) / SUM( ( julianday(end_time)-JULIANDAY(start_time) ) * 86400/60 ) ,1)
+                     as count, ROUND( SUM( ( julianday(end_time)-JULIANDAY(start_time) ) * 86400/60 ) ,1) AS difference from process where date = '${year}-${month}-${date}' and name = '${val}' and CAST(strftime('%H',start_time) AS integer) between ${new_data.labels[idx]} and ${new_data.labels[idx]};` // idx +1 에서 수정
                     console.log(query)
                     let results = await db_comm(db,'SELECT',query)
                     if (results[0].difference === null){
@@ -213,7 +214,7 @@ function ScreenTime($div,name,char_data){
 
     const footer = document.createElement('div');
     footer.setAttribute("class","footer")
-    footer.innerHTML = `눈 깜박임 횟수 : ${eye_cnt}회`
+    footer.innerHTML = `분당 눈 깜박임 횟수 : ${eye_cnt}회`
 
     const ScreenTime = box($div,'일간 사용량',[header,mychart,footer],'총 사용량');
     //ScreenTime.style.border = 'solid'
