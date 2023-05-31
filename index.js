@@ -181,8 +181,8 @@ async function yes_client(){
     let [name,pid] = getCurrentForegroundProcess();
     name = name.split('\\')
     name = name[name.length-1] + 'e'
-  
-    if (prev_pid !== pid && prev_pid !== '') {
+    let eye_cnt = data.toString()
+    if ( (prev_pid !== pid && prev_pid !== '') && (!(eye_cnt == 'no camera' || eye_cnt == 'camera loading' )) ) {
       console.log('--- foreground change ---')
       let today = new Date();
       let year = today.getFullYear(); // 년도
@@ -193,7 +193,7 @@ async function yes_client(){
       let seconds = String(today.getSeconds()).padStart(2, "0");  // 초
       let cur_time = `${hours}:${minutes}:${seconds}`
       let db = db_conn()
-      let eye_cnt = data.toString()
+      
       let query = `INSERT INTO process (name,start_time,end_time,count,date) VALUES ('${prev_name}','${prev_time}','${cur_time}',${eye_cnt-pre_eye_cnt},'${year}-${month}-${date}')`
       console.log('query',query)
       prev_pid = pid
@@ -239,6 +239,7 @@ function no_client(){
       name = name.split('\\')
       name = name[name.length-1] + 'e'
 
+      /* client 꺼져있으면 측정 안됨 
       if (prev_pid !== pid && prev_pid !== '') {
         console.log('--- pid change ---')
         let today = new Date();
@@ -263,7 +264,9 @@ function no_client(){
         prev_pid = pid
         prev_name = name
       }
+      */
         }
+      
 
     }, 1000)
     

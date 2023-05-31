@@ -59,7 +59,8 @@ def socket_func(sock,conn):
             data = conn.recv(1024)
             if data.decode('utf-8') == "start":
                 if is_camera == False:
-                    sendTextViaSocket(f'0',conn) # 카메라 없으면 그때 동안은 0(카메라 없음)으로 측정
+                    sendTextViaSocket(f'no camera',conn) # 카메라 없으면 그때 동안은 0(카메라 없음)으로 측정
+
                 else:
                     if camera_loaded:    
                         print('count : ',cur_cnt)
