@@ -233,6 +233,7 @@ function most_used($div,data){
 
     for (let i =0; i < the_top_few; i ++){
         let time_used = data.datasets[i].data.reduce((sum, num) => sum + num); // 7일 기준 sum
+        console.log(time_used)
         dataset.push(
             { icon : './public/assets/icon.svg', title : `${data.datasets[i].label}`, progressbar :`${time_used.toFixed(1)}`,cnt : `${time_used.toFixed(1)}` }, // 1번. TODO 아이콘을 가져와야 함 2번. progressbar 디자인을 바꿔야됨.
         )
