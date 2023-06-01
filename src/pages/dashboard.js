@@ -12,11 +12,8 @@ const {db_conn,db_comm, db_disconn } = require('../utils/db_utils.js');
 const getDayOfWeek = require('../utils/time_utils.js');
 
 // 전역 변수 //
-let today = new Date();
-let year = today.getFullYear(); // 년도
-let month = String(today.getMonth() + 1).padStart(2, "0");  // 월
-let date = String(today.getDate()).padStart(2, "0");  // 날짜
-let week_date = getDayOfWeek(`'${year}-${month}-${date}'`)
+
+let week_date = getDayOfWeek()
 let timer;
 let callbackFlag = false;
 let total_time = 0;
@@ -77,7 +74,7 @@ class dashboardPage {
                 new_data.labels = ['월', '화', '수', '목','금','토','일']
                 
                 for (let idx=0;idx<7;idx++){
-                    let query = `select name,SUM(count) as count, ROUND( SUM( ( julianday(end_time)-JULIANDAY(start_time) ) * 86400/60 ) ,1) AS difference from process where date = '${year}-${month}-${week_date+idx}' group by name order by difference desc`
+                    let query = `select name,SUM(count) as count, ROUND( SUM( ( julianday(end_time)-JULIANDAY(start_time) ) * 86400/60 ) ,1) AS difference from process where date = '${week_date[idx]}' group by name order by difference desc`
                     let duplicate = false
                     let results = await db_comm(db,'SELECT',query)
 
