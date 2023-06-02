@@ -31,7 +31,8 @@ const data = [
     { state : 'red' , src : './public/assets/red-blinking.svg'}
 ]
 
-class detailPages {
+
+class detailTestPages {
     constructor($body){
         this.$body = $body;
         this.data = {
@@ -136,6 +137,102 @@ class detailPages {
     }
 
     render(){
+        const demo_data = {
+            "datasets": [
+                {
+                    "label": "Code.exe",
+                    "data": [
+                        32.2,
+                        16.4,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        15.3,
+                        35.6,
+                        26.4,
+                        0,
+                        23.4,
+                        42.7,
+                        17.2,
+                        4.6,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        6.3,
+                        32.2
+                    ],
+                    "type": "bar",
+                    "yAxisID": "y-left",
+                    "borderColor": "rgb(54, 162, 235)",
+                    "backgroundColor": "rgba(54, 162, 235, 0.5)"
+                },
+                {
+                    "label": "Code.exe",
+                    "data": [
+                        18.2,
+                        17.3,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        20.8,
+                        20.4,
+                        0,
+                        19.8,
+                        17.8,
+                        18.4,
+                        18.8,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        18.7,
+                        18.4
+                    ],
+                    "type": "line",
+                    "yAxisID": "y-right",
+                    "borderColor": "rgb(255, 99, 132)",
+                    "backgroundColor": "rgba(255, 99, 132, 0.5)"
+                }
+            ],
+            "labels": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10",
+                "11",
+                "12",
+                "13",
+                "14",
+                "15",
+                "16",
+                "17",
+                "18",
+                "19",
+                "20",
+                "21",
+                "22",
+                "23"
+            ]
+        }
         console.log('detail render')
         this.$body.innerHTML = '';
         const div = background(this.$body);
@@ -160,21 +257,32 @@ class detailPages {
             div.appendChild(camera)
         }
 
-        ScreenTime(div,this.route,'screen',this.data) // 앱 사용시간 컴포넌트
+        ScreenTime_demo(div,this.route,'screen',demo_data) // 앱 사용시간 컴포넌트
     }
 }
 
 
-function ScreenTime($div,p_name,name,char_data){
-
+function ScreenTime_demo($div,p_name,name,char_data){
+    p_name = '비주얼 스튜디오 코드'
+    console.log(char_data,"데모데이터")
     // 스크린 타임 컴포넌트
     let cal = char_data.datasets[0].data.reduce((sum, num) => sum + num);
     let eye_cnt = char_data.datasets[1].data.reduce((sum, num) => sum + num);
     const header = document.createElement('div');
     header.setAttribute("class","header")
-    header.innerHTML = `${p_name} 총 스크린 타임 : ${(cal).toFixed(1)}분`
+    header.innerHTML = `"${p_name}" <br/> 총 스크린 타임 : ${(cal).toFixed(1)}분`
     header.style.fontSize = '10px';
     header.style.margin = '4px';
+
+    let time_table =  [0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0,0, 0,0,0,0]; let us_time = 0;
+    char_data.datasets[1].data.forEach((result,index) => {
+        time_table[index] += result
+    })
+    time_table.forEach((day)=>{
+        if (day != 0){
+            us_time +=1
+        }
+    })
 
     const mychart = document.createElement('canvas');
     mychart.setAttribute('id',`${name}`)
@@ -216,7 +324,7 @@ function ScreenTime($div,p_name,name,char_data){
 
     const footer = document.createElement('div');
     footer.setAttribute("class","footer")
-    footer.innerHTML = `분당 눈 깜박임 횟수 : ${eye_cnt.toFixed(1)}회`
+    footer.innerHTML = `분당 눈 깜박임 횟수 : ${(eye_cnt/us_time).toFixed(1)}회`
     footer.style.fontSize='10px';
 
     const ScreenTime = box($div,'일간 사용량',[header,mychart,footer],'총 사용량');
@@ -225,4 +333,4 @@ function ScreenTime($div,p_name,name,char_data){
 }
 
 
-module.exports = {detailPages};
+module.exports = {detailTestPages};

@@ -28,7 +28,7 @@ const data = [
     { state : 'camera_off', src : './public/assets/video-camera-slash.svg'},
     { state : 'red' , src : './public/assets/red-blinking.svg'}
 ]
-class dashboardPage {
+class dashboardTestPage {
     constructor($body){
         this.$body = $body;
         this.data = {
@@ -129,6 +129,7 @@ class dashboardPage {
 
     
     render(){
+
         /*
             스크린 타임 요약 컴포넌트 (ScreenTime)
             container > (title,graph,summary)
@@ -158,16 +159,16 @@ class dashboardPage {
             div.appendChild(camera)
         }
 
-        ScreenTime(div,this.data,total_time) // 스크린 타임 컴포넌트 출력
+        ScreenTime_demo(div,this.data,total_time) // 스크린 타임 컴포넌트 출력
 
-        most_used(div,this.data) // most used 컴포넌트 출력
+        most_used_demo(div,this.data) // most used 컴포넌트 출력
 
     }
 
 }
 
 
-function ScreenTime($div,data,total_time){
+function ScreenTime_demo($div,data,total_time){
     // 변수 초기화
     let week = [0,0,0,0,0,0,0]; let usage_day = 0;
 
@@ -187,7 +188,7 @@ function ScreenTime($div,data,total_time){
     // 스크린 타임 컴포넌트
     const header = document.createElement('div');
     header.setAttribute("class","header")
-    header.innerHTML = `일일 평균 : ${(total_time/usage_day).toFixed(1)}분`
+    header.innerHTML = `데모 일일 평균 : ${(total_time/usage_day).toFixed(1)}분`
     header.style.fontSize = '10px';
     header.style.margin = '4px';
 
@@ -226,9 +227,9 @@ function ScreenTime($div,data,total_time){
 }
 
 // mout used 컴포넌트
-function most_used($div,data){
+function most_used_demo($div,data){
     // 변수 초기화 //
-    const dataset = []
+    let dataset = []
     const the_top_few = 4 // 상위 $'{the_top_few}개를 dashboard에 보이기
     
     const MostUsed = box($div,'MOST USED');
@@ -241,6 +242,12 @@ function most_used($div,data){
             { icon : './public/assets/icon.svg', title : `${data.datasets[i].label}`, progressbar :`${time_used.toFixed(1)}`,cnt : `${time_used.toFixed(1)}` }, // 1번. TODO 아이콘을 가져와야 함 2번. progressbar 디자인을 바꿔야됨.
         )
     }
+    dataset =[
+        { icon : './public/assets/vscode.png', title : `비주얼 스튜디오 코드`, progressbar :`80`,cnt : `252.3` },
+        { icon : './public/assets/logo.svg', title : `눈 어플리케이션`, progressbar :`20`,cnt : `102.2` },
+        { icon : './public/assets/datagrip.png', title : `DataGrip`, progressbar :`30`,cnt : `110.3` },
+        { icon : './public/assets/whale.jpg', title : `네이버 웨일`, progressbar :`40`,cnt : `433.5` },
+    ]
 
     for (let i = 0;i < the_top_few; i++){
 
@@ -248,7 +255,7 @@ function most_used($div,data){
         const element = document.createElement('div');
         const icon = document.createElement('img');
         icon.src = dataset[i]['icon']
-
+        icon.style.height='30px';
         const contents = document.createElement('div');
         const content_title = document.createElement('div');
         content_title.innerText = dataset[i]['title'];
@@ -265,7 +272,7 @@ function most_used($div,data){
         element.appendChild(icon)
         element.appendChild(contents)
 
-        button(element,`>`,`#detail#${dataset[i]['title']}`)
+        button(element,`>>`,`#detail_demo#${dataset[i]['title']}`)
         MostUsed.appendChild(element)
         element.style.background = 'white'
         element.style.borderRadius = '3%';
@@ -289,4 +296,4 @@ function most_used($div,data){
     
 }
 
-module.exports = {dashboardPage};
+module.exports = {dashboardTestPage};

@@ -37,23 +37,25 @@ class mainPages {
                 iscamera = false
             }
             if (prevstate != iscamera){
-                console.log('iscamera')
+                prevstate = iscamera
+                console.log('iscamera',prevstate,iscamera)
                 this.render()
             }
         })
         ipcRenderer.on('status_check', (evt, payload) => {
-            let prevstate = 0
+            let prevstate = '0'
             if (payload == 'Good'){
-                status_img = 0
+                status_img = '0'
             }
             if (payload == 'soso'){
-                status_img = 1
+                status_img = '1'
             }
             else{
-                status_img = 2
+                status_img = '2'
             }
             if (prevstate != status_img){
-                console.log('isstatus')
+                console.log('isstatus',prevstate,status_img)
+                prevstate = status_img
                 this.render()
             }
         })
@@ -89,25 +91,27 @@ class mainPages {
         }
         
 
-        // 이미지
-        const img = document.createElement("img");
-        img.setAttribute('id','logo')
-        img.src = data[status_img]['src']
-        div.appendChild(img);
 
 
         // 버튼
         const button = document.createElement('button');
-        button.style.width = '400px';
-        button.style.height = '50px';
+        //button.style.width = '400px';
+        //button.style.height = '50px';
+        button.style.border = 'none';
         button.style.marginTop = '40px';
+        button.setAttribute('id','main_button');
         div.appendChild(button);
 
-        const text = document.createTextNode('자세히 알아보기');
-        button.appendChild(text);
+        //const text = document.createTextNode('자세히 알아보기');
+        //button.appendChild(text);
+        // 이미지
+        const img = document.createElement("img");
+        img.setAttribute('id','logo')
+        img.src = data[status_img]['src']
+        button.appendChild(img);
         
         button.addEventListener("click", (e) => {
-            const href = window.location.href ='#dashboard';
+            const href = window.location.href ='#dashboard_demo';
             console.log(href);
         })
 
