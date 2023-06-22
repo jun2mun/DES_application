@@ -71,8 +71,3 @@ github 주소
 
 **발표 자료**
 
-[발표 자료 PPT 다운로드](https://blog.hakmoon.com/wp-content/uploads/2023/06/소캡톤_발표.pptx)
-
-다운로드 버튼
-
-.editor-styles-wrapper .wp-container-0.wp-container-0 { flex-wrap: nowrap; }
