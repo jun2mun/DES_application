@@ -243,10 +243,10 @@ function most_used_demo($div,data){
         )
     }
     dataset =[
-        { icon : './public/assets/vscode.png', title : `비주얼 스튜디오 코드`, progressbar :`80`,cnt : `252.3` },
-        { icon : './public/assets/logo.svg', title : `눈 어플리케이션`, progressbar :`20`,cnt : `102.2` },
-        { icon : './public/assets/datagrip.png', title : `DataGrip`, progressbar :`30`,cnt : `110.3` },
-        { icon : './public/assets/whale.jpg', title : `네이버 웨일`, progressbar :`40`,cnt : `433.5` },
+        { icon : './public/assets/vscode.png', title : `비주얼 스튜디오 코드`, progressbar :`80`,cnt : `252.3`, eye_cnt : `18.7` },
+        { icon : './public/assets/logo.svg', title : `눈 어플리케이션`, progressbar :`20`,cnt : `102.2`, eye_cnt : `21.4` },
+        { icon : './public/assets/datagrip.png', title : `DataGrip`, progressbar :`30`,cnt : `110.3`, eye_cnt : `20.9` },
+        { icon : './public/assets/whale.jpg', title : `네이버 웨일`, progressbar :`40`,cnt : `433.5`, eye_cnt : `17.8` },
     ]
 
     for (let i = 0;i < the_top_few; i++){
@@ -265,12 +265,21 @@ function most_used_demo($div,data){
         bar.max='100'; bar.value= dataset[i]['progressbar']
         const use_time = document.createTextNode(` ${dataset[i].cnt} min`)
 
+        const eye_cnt = document.createElement('div')
+        eye_cnt.innerHTML = `평균(${dataset[i]['eye_cnt']}회)`
+        //eye_cnt.style.border = 'solid';
+        eye_cnt.style.display = 'flex';
+        eye_cnt.style.alignItems = 'center'
+        eye_cnt.style.fontSize = '14px';
+        
         contents.appendChild(content_title)
         content_detail.appendChild(bar)
         content_detail.appendChild(use_time);
         contents.appendChild(content_detail)
         element.appendChild(icon)
         element.appendChild(contents)
+        element.appendChild(eye_cnt)
+        
 
         button(element,`>>`,`#detail_demo#${dataset[i]['title']}`)
         MostUsed.appendChild(element)

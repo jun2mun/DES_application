@@ -26,6 +26,10 @@ function showNotification (conn) {
     new Notification({ title: 'network disconnected', body: '카메라 서비스와 연결이 끊겼습니다.' }).show()
   }
 }
+setInterval(()=>{
+  console.log('noti')
+  new Notification({ title: '눈 피로도 알림', body: '눈 깜박임이 저하되었습니다. 평균(18.4회)'}).show()
+},10000)
 
 const { ipcMain } = require('electron')
 
@@ -216,6 +220,7 @@ async function yes_client(){
 function no_client(){
   let socket_timer = setInterval(() => {
     if (client_on) {
+      console.log('conn')
       showNotification(true)
       clearInterval(socket_timer)
       yes_client()
