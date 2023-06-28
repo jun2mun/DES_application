@@ -3,10 +3,8 @@ const {kernel32} = require('./api/kernel32_n.js');
 const {psapi} = require('./api/psapi_n.js');
 const {user32}= require('./api/user32_n');
 
-const PROCESS_QUERY_LIMITED_INFORMATION = 0x1000;
-
-
 module.exports = function getCurrentForegroundProcess() {
+  const PROCESS_QUERY_LIMITED_INFORMATION = 0x1000;
   // 현재 포어그라운드에서 작동하는 프로세스를 가져오는 메소드 //
   const hWnd = user32.GetForegroundWindow();
 

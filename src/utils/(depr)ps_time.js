@@ -3,7 +3,7 @@ const ref = require('ref-napi');
 
 const {kernel32} = require('./api/kernel32_n.js');
 const {psapi} = require('./api/psapi_n.js');
-const {user32}= require('./api/user32_n');
+const {user32}= require('./api/user32_n.js');
 
 function getForegroundDuration(pid, callback) {
   const hWnd = user32.GetForegroundWindow();

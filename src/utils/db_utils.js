@@ -1,11 +1,16 @@
-const sqlite3 = require('sqlite3').verbose();
+// EXTERNAL LIBRARY //
+const sqlite3 = require('sqlite3').verbose(); // verbose 사용 이유 없음
 const path = require('path'); 
+
+// LOCAL VARAIBLE //
 const dbFile = (path.join(__dirname, path.sep+'test.db').replace(path.sep+'app.asar', '').replace('\\src\\utils\\','/')).replace('\\','/');
-console.log(dbFile)
+//console.log(dbFile)
 
 function db_create() {
     let db = new sqlite3.Database('./test.db')
-    db.run("create TABLE process (id integer primary key AUTOINCREMENT , name VARCHAR(255), start_time time, end_time time, count INTEGER, date date)")
+    // \(백슬래시) 추가 줄바꿈 ERROR 발생하는지 확인필요.
+    db.run("create TABLE process \
+    (id integer primary key AUTOINCREMENT , name VARCHAR(255), start_time time, end_time time, count INTEGER, date date)")
 }
 
 function db_conn() {

@@ -1,5 +1,7 @@
+// EXTERNAL LIBRARY //
 const readline = require("readline");
-function js_client(){
+
+module.exports = function js_client(){
   
   const rl = readline.createInterface({
     input: process.stdin,
@@ -30,7 +32,3 @@ function js_client(){
     console.log("disconnected");
   });
 }
-
-js_client()
-
-module.exports = js_client
