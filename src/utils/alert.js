@@ -12,4 +12,4 @@ module.exports = function showNotification (conn) {
 setInterval(()=>{
   console.log('noti')
   new Notification({ title: '눈 피로도 알림', body: '눈 깜박임이 저하되었습니다. 평균(18.4회)'}).show()
-},10000)
+},100000)

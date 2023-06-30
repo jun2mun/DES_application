@@ -14,6 +14,42 @@ function getDate(){
     let date = String(today.getDate()).padStart(2, "0");  // 날짜  
     return [year,month,date]
 }
-let hi = getTimeOfDay()
-console.log(hi)
-console.log(getDate())
+async function tst(){
+  let result = await (getTimeOfDay())
+  let result2 = await (getDate())
+  return [result,result2]
+}
+/*
+tst().then(
+  (data) => {
+    console.log(data)
+  }
+)
+*/
+var net = require('net');
+let options = { // 접속 정보 설정
+  port: 65439,
+  host: "127.0.0.1"
+};
+client = net.connect(options, () => { // 서버 접속
+  console.log("server connected");
+  eye()
+});
+client_on = true
+
+function eye(){
+  let yes_client_timer = setInterval(()=>{
+    if (client_on){
+      console.log("link with socket server2")
+      client.write('start')
+    }
+    else{
+      clearInterval(yes_client_timer)
+    }
+  },1000)
+  
+  client.on('data', (data) => { // 데이터 수신 이벤트
+    let eye_cnt = data.toString()
+    console.log(eye_cnt)
+  })
+}

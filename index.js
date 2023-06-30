@@ -1,31 +1,29 @@
 // EXTERNAL LIBRARY //
 const path = require('path');
-
-let child = require('child_process').execFile;
-let executablePath = (path.join(__dirname, path.sep+'backend/main.exe').replace(path.sep+'app.asar', '').replace('\\src\\utils\\','/')).replace('\\','/');
-
-let sub_process = child(executablePath, function(err, data) {
-  console.log(executablePath, "start")
-    if(err){
-       console.error(err);
-       return;
-    }
-});
-
-let limit_alert = [0,0.4,0.7,1] // 경고 기준 TODO 변수로 해야함.
-
-
-const showNotification = require('./src/utils/alert.js')
-
-
-
-
 const { ipcMain } = require('electron')
+let net = require('net');
 
-// Modules to control application life and create native browser window
-const { app, BrowserWindow} = require('electron')
-const ffi = require('ffi-napi') // 외부 모듈 사용 위한 패키지
+// INTERNAL LIBRARY //
+const sub_process = require('./src/utils/ipc_service.js') // 서비스 실행 모듈
 
+const showNotification = require('./src/utils/alert.js') // 알림 모듈
+
+const getCurrentForegroundProcess = require('./src/utils/foreground.js') // 스크린타임 모듈
+
+const ipc_socket = require('./src/utils/ipc_socket.js'); // ipc 통신 모듈
+
+// ======================================================================================================================= //
+// LOCAL VARIABLES //
+
+let options = { // 접속 정보 설정
+  port: 65439,
+  host: "127.0.0.1"
+};
+let client = new ipc_socket(options);
+client.init()
+
+
+const { app, BrowserWindow} = require('electron') // Modules to control application life and create native browser window
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -55,7 +53,6 @@ app.whenReady().then(() => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
 })
-
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
@@ -64,178 +61,15 @@ app.on('window-all-closed', () => {
   client.write('close')
   sub_process.kill('SIGINT')
 })
-
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
+// ======================================================================================================================= //
 
 
-const getCurrentForegroundProcess = require('./src/utils/foreground.js')
-const {db_conn,db_comm, db_disconn } = require('./src/utils/db_utils.js');
-const ipc_socket = require('./src/utils/ipc_socket.js');
-
-var net = require('net');
-let client = ipc_socket();
-var options = { // 접속 정보 설정
-  port: 65439,
-  host: "127.0.0.1"
-};
-
-// TODO 이벤트 핸들러 형식으로 변경
-let prev_name = '';
-let prev_pid = '';
-// 1초마다 프로세스 변경되었나 감지
-
-const {getTimeOfDay,getDate} = require('./src/utils/time_utils.js')
-
-let day = getTimeOfDay() ;let hours = day[0]; let minutes = day[1]; let seconds = day[2]
-let prev_time = `${hours}:${minutes}:${seconds}`
-
-let pre_eye_cnt = 0;
-let client_on = true
-client.on('error',(err) => {
-  try {
-    console.log(err)
-    client_on = false
-    no_client()
-    console.log('cannot access to socket server')
-    // 에러 발생 시(눈탐지 서비스 다운시), 어떻게 해야 할지 TODO
-  } catch (error) {
-    //console.log(error)
-  }
-})
-// ipcMain에서의 이벤트 수신
-ipcMain.on('main', (evt, payload) => {
-  console.log('ipcMain',client_on)
-  if (client_on == true){
-    evt.reply('camera_check', 'conn')
-  }
-  else{
-    evt.reply('camera_check', 'disconn')
-  }
-})
-ipcMain.on('status', (evt, payload) => {
-  console.log('ipcMain_status')
-  if (true){
-    evt.reply('status_check', 'soso')
-  }
-  else{
-    evt.reply('camera_check', 'disconn')
-  }
-})
 
 
-async function yes_client(){
-  let yes_client_timer = setInterval(()=>{
-    if (client_on){
-      console.log("link with socket server")
-      client.write('start') // 이벤트 전달
-    }
-    else{
-      clearInterval(yes_client_timer)
-      no_client()
-    }
-  },1000 )
-  client.on('error',(err) => {
-    try {
-      showNotification(false)
-      client_on = false
-      console.log('cannot access to socket server')
-      //console.log('에러 발생 : ',err)
-      // 에러 발생 시(눈탐지 서비스 다운시), 어떻게 해야 할지 TODO
-    } catch (error) {      
-      //console.log(error)
-    }
-  })
-  client.on('data', (data) => { // 데이터 수신 이벤트
-    console.log('data recv')
-    let [name,pid] = getCurrentForegroundProcess();
-    name = name.split('\\')
-    name = name[name.length-1] + 'e'
-    let eye_cnt = data.toString()
-    if ( (prev_pid !== pid && prev_pid !== '') && (!(eye_cnt == 'no camera' || eye_cnt == 'camera loading' )) ) {
-      console.log('--- foreground change ---')
-      let day = getTimeOfDay() ;let hours = day[0]; let minutes = day[1]; let seconds = day[2]
-      let value = getDate(); let year = value[0] ; let month = value[1]; let date = value[2]
-      let cur_time = `${hours}:${minutes}:${seconds}`
-      let db = db_conn()
-      
-      let query = `INSERT INTO process (name,start_time,end_time,count,date) VALUES ('${prev_name}','${prev_time}','${cur_time}',${eye_cnt-pre_eye_cnt},'${year}-${month}-${date}')`
-      console.log('query',query)
-      prev_pid = pid
-      prev_name = name
-      prev_time = cur_time
-      pre_eye_cnt = eye_cnt
-      db_comm(db,'INSERT',query)
-      db_disconn(db)
-    }
-    if (prev_pid == ''){
-      // 처음 시작하면
-      prev_pid = pid
-      prev_name = name
-    }
-  });
-  
-
-}
-
-function no_client(){
-  let socket_timer = setInterval(() => {
-    if (client_on) {
-      console.log('conn')
-      showNotification(true)
-      clearInterval(socket_timer)
-      yes_client()
-    }
-    else {
-      client = net.connect(options, () => { // 서버 접속
-        client_on = true
-        console.log("connected to socket server");
-      });
-      client.on('error',(err) => {
-        try {
-          client_on = false
-          console.log('cannot access to socket server')
-          // 에러 발생 시(눈탐지 서비스 다운시), 어떻게 해야 할지 TODO
-        } catch (error) {      
-        }
-      })
-      
-      console.log('no client')
-      let [name,pid] = getCurrentForegroundProcess();
-      name = name.split('\\')
-      name = name[name.length-1] + 'e'
-
-      /* client 꺼져있으면 측정 안됨 
-      if (prev_pid !== pid && prev_pid !== '') {
-        console.log('--- pid change ---')
-        let today = new Date();
-        let year = today.getFullYear(); // 년도
-        let month = String(today.getMonth() + 1).padStart(2, "0");  // 월
-        let date = String(today.getDate()).padStart(2, "0");  // 날짜
-        let hours = String(today.getHours()).padStart(2, "0"); // 시
-        let minutes = String(today.getMinutes()).padStart(2, "0");  // 분
-        let seconds = String(today.getSeconds()).padStart(2, "0");  // 초
-        let cur_time = `${hours}:${minutes}:${seconds}`
-        let db = db_conn()
-        let query = `INSERT INTO process (name,start_time,end_time,count,date) VALUES ('${prev_name}','${prev_time}','${cur_time}',${0},'${year}-${month}-${date}')`
-        console.log('query',query)
-        prev_pid = pid
-        prev_name = name
-        prev_time = cur_time
-        db_comm(db,'INSERT',query)
-        db_disconn(db)
-      }
-      if (prev_pid == ''){
-        // 처음 시작하면
-        prev_pid = pid
-        prev_name = name
-      }
-      */
-        }
-      
-
-    }, 1000)
-    
-}
 
 
+
+
+sub_process()

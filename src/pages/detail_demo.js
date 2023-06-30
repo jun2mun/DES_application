@@ -6,17 +6,14 @@ const {chart} = require('../components/chart.js');
 
 // utils //
 const {db_conn,db_comm, db_disconn } = require('../utils/db_utils.js');
-const getDayOfWeek = require('../utils/time_utils.js');
+const {getDate} = require('../utils/time_utils.js');
 
 const { ipcRenderer } = require('electron')
 
 // 전역 변수 //
 let callbackFlag = false;
-let today = new Date();
-let year = today.getFullYear(); // 년도
-let month = String(today.getMonth() + 1).padStart(2, "0");  // 월
-let date = String(today.getDate()).padStart(2, "0");  // 날짜
-let week_date = getDayOfWeek(`'${year}-${month}-${date}'`)
+let value = getDate(); let year = value[0] ; let month = value[1]; let date = value[2]
+let week_date = `'${year}-${month}-${date}'`
 
 
 let timer;

@@ -9,7 +9,7 @@ const {chart} = require('../components/chart.js')
 
 // utils //
 const {db_conn,db_comm, db_disconn } = require('../utils/db_utils.js');
-const getDayOfWeek = require('../utils/time_utils.js');
+const {getDayOfWeek} = require('../utils/time_utils.js');
 
 // 전역 변수 //
 

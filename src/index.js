@@ -50,8 +50,8 @@ class IndexView {
     loadContent(url) {
         const routes = [
             // REAL PAGE //
-            //{ path: /detail/, start:() => detail.setState(url)},
-            //{ path: /dashboard/, start:() => dashboard.setState()},
+            { path: /detail/, start:() => detail.setState(url)},
+            { path: /dashboard/, start:() => dashboard.setState()},
             // DEMO PAGE //
             { path: /detail_demo/, start:() => detail_demo.setState(url)},
             { path: /dashboard_demo/, start:() => dashboard_demo.setState()},

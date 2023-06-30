@@ -57,6 +57,7 @@ def socket_func(sock,conn):
         try:
                 
             data = conn.recv(1024)
+            print('data :',data)
             if data.decode('utf-8') == "start":
                 if is_camera == False:
                     sendTextViaSocket(f'no camera',conn) # 카메라 없으면 그때 동안은 0(카메라 없음)으로 측정
@@ -81,7 +82,6 @@ def socket_func(sock,conn):
 def sendTextViaSocket(message, sock):
     # encode the text message
     encodedMessage = bytes(message, 'utf-8')
-
     # send the data via the socket to the server
     sock.sendall(encodedMessage)
 
