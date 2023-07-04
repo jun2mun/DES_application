@@ -1,14 +1,10 @@
 // EXTERNAL LIBRARY //
 const path = require('path');
-const { ipcMain } = require('electron')
-let net = require('net');
+
+const { app, BrowserWindow} = require('electron') // Modules to control application life and create native browser window
 
 // INTERNAL LIBRARY //
 const sub_process = require('./src/utils/ipc_service.js') // 서비스 실행 모듈
-
-const showNotification = require('./src/utils/alert.js') // 알림 모듈
-
-const getCurrentForegroundProcess = require('./src/utils/foreground.js') // 스크린타임 모듈
 
 const ipc_socket = require('./src/utils/ipc_socket.js'); // ipc 통신 모듈
 
@@ -19,12 +15,13 @@ let options = { // 접속 정보 설정
   port: 65439,
   host: "127.0.0.1"
 };
-let client = new ipc_socket(options);
+
+let client = new ipc_socket(options); // client 연결
 client.init()
 
+const camera_service = sub_process() // 카메라 실행
 
-const { app, BrowserWindow} = require('electron') // Modules to control application life and create native browser window
-const createWindow = () => {
+const createWindow = () => { // 데스크톱 앱 화면 띄우기
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 800,
@@ -58,8 +55,8 @@ app.whenReady().then(() => {
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
-  client.write('close')
-  sub_process.kill('SIGINT')
+  client.send_message('close')
+  camera_service.kill('SIGINT')
 })
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
@@ -67,9 +64,3 @@ app.on('window-all-closed', () => {
 
 
 
-
-
-
-
-
-sub_process()

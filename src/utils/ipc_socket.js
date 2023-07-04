@@ -47,11 +47,14 @@ module.exports = class ipc_socket{
       ) 
   }
 
+  send_message(message){
+    this.client.write(message)
+  }
   async yes_client(){
 
     let yes_client_timer = setInterval(()=>{
       if (this.client_on){
-        console.log("link with socket server2")
+        console.log("link with socket server")
         this.client.write('start') // 이벤트 전달
       }
       else{
@@ -73,13 +76,11 @@ module.exports = class ipc_socket{
     })
 
     this.client.on('data', (data) => { // 데이터 수신 이벤트
-      console.log(data,'?')
+
       let [name,pid] = getCurrentForegroundProcess();
       name = name.split('\\')
       name = name[name.length-1] + 'e'
       let eye_cnt = data.toString()
-      console.log('data hi')
-      console.log(this.prev_pid,this.prev_name)
       if ( (this.prev_pid !== pid && this.prev_pid !== '') && (!(eye_cnt == 'no camera' || eye_cnt == 'camera loading' )) ) {
         
         console.log('--- foreground change ---')
@@ -90,7 +91,7 @@ module.exports = class ipc_socket{
         let db = db_conn()
         
         let query = `INSERT INTO process (name,start_time,end_time,count,date) VALUES ('${this.prev_name}','${this.prev_time}','${cur_time}',${eye_cnt-this.pre_eye_cnt},'${year}-${month}-${date}')`
-        console.log('query',query)
+        console.log('query',query,eye_cnt,this.pre_eye_cnt)
 
         this.prev_pid = pid
         this.prev_name = name

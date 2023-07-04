@@ -39,7 +39,7 @@ class IndexView {
             clearInterval(this.val) // timer 삭제 
         };
         const hashLocation = window.location.hash.substring(1);
-        console.log('route change',hashLocation)
+        //console.log('route change',hashLocation)
         app.innerHTML = ''; // hash 경로 변경시 초기화
         //console.log(hashLocation);
         this.loadContent(hashLocation);

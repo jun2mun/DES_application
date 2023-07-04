@@ -1,61 +1,55 @@
 /// 일단 fixed ////
-
-const { set } = require('ref-napi');
-const {background} = require('../components/background.js');
-
-const data = [
-    { state : 'Good' , src : './public/assets/logo.svg' },
-    { state : 'soso' , src : './public/assets/soso.svg' },
-    { state : 'bad' , src : './public/assets/bad.svg' },
-    { state : 'camera', src : './public/assets/video-camera.svg'},
-    { state : 'camera_off', src : './public/assets/video-camera-slash.svg'},
-    { state : 'red' , src : './public/assets/red-blinking.svg'}
-]
-let iscamera = false
-let status_img = 0
+// EXTERNAL LIBRARY //
 const { ipcRenderer } = require('electron')
+
+// INTERNAL LIBRARY //
+const {background} = require('../components/background.js');
+const data = require('../static/statics.js') // 메인화면 아이콘 배열
 
 class mainPages {
     constructor($body){
         this.$body = $body;
         this.iscamera = false
+        this.status_img = 0
     }
     setState(){
-        console.log("mainpages render")
+        console.log("메인페이지 렌더링")
+        
         this.render();
+
+        // process 탐지
         let timer = setInterval(() => {
             const payload = 'camera_check'
             ipcRenderer.send('main', payload)
             ipcRenderer.send('status','status_check')
         }, 1000);
+        
         ipcRenderer.on('camera_check', (evt, payload) => {
-            let prevstate = iscamera
+            let prevstate = this.iscamera
             if (payload == 'conn'){
-                iscamera = true
+                this.iscamera = true
             }
             else{
-                iscamera = false
+                this.iscamera = false
             }
-            if (prevstate != iscamera){
-                prevstate = iscamera
-                console.log('iscamera',prevstate,iscamera)
+            if (prevstate != this.iscamera){
+                prevstate = this.iscamera
                 this.render()
             }
         })
         ipcRenderer.on('status_check', (evt, payload) => {
             let prevstate = '0'
             if (payload == 'Good'){
-                status_img = '0'
+                this.status_img = '0'
             }
             if (payload == 'soso'){
-                status_img = '1'
+                this.status_img = '1'
             }
             else{
-                status_img = '2'
+                this.status_img = '2'
             }
-            if (prevstate != status_img){
-                console.log('isstatus',prevstate,status_img)
-                prevstate = status_img
+            if (prevstate != this.status_img){
+                prevstate = this.status_img
                 this.render()
             }
         })
@@ -64,6 +58,8 @@ class mainPages {
 
 
     render() {
+        
+        // TODO 가독성 안좋은데, 수정 할 방법 구안 //
         this.$body.innerHTML = '';
         const div = background(this.$body); // 배경색 테마 적용
         
@@ -79,7 +75,7 @@ class mainPages {
         camera.style.top = 0
         camera.style.display = 'flex'
         /////
-        if (iscamera == false){
+        if (this.iscamera == false){
             camera.innerHTML =''
             camera.innerHTML = `<div><p>카메라 OFF &nbsp</p></div><img src='${data[4]['src']}'/>`
             div.appendChild(camera)
@@ -107,12 +103,12 @@ class mainPages {
         // 이미지
         const img = document.createElement("img");
         img.setAttribute('id','logo')
-        img.src = data[status_img]['src']
+        img.src = data[this.status_img]['src']
         button.appendChild(img);
         
         button.addEventListener("click", (e) => {
             const href = window.location.href ='#dashboard';
-            console.log(href);
+            //console.log(href);
         })
 
     }

@@ -4,7 +4,9 @@ const path = require('path');
 
 // LOCAL VARAIBLE //
 const dbFile = (path.join(__dirname, path.sep+'test.db').replace(path.sep+'app.asar', '').replace('\\src\\utils\\','/')).replace('\\','/');
-//console.log(dbFile)
+console.log(dbFile)
+
+
 
 function db_create() {
     let db = new sqlite3.Database('./test.db')
@@ -16,9 +18,9 @@ function db_create() {
 function db_conn() {
     let db = new sqlite3.Database(`${dbFile}`, sqlite3.OPEN_READWRITE, (err) => {
         if (err) {
-            console.error(err.message);
+            //console.error(err.message);
         } else {
-            console.log('Connected to the mydb database.');
+            //console.log('Connected to the mydb database.');
         }
     });
     return db
@@ -29,7 +31,7 @@ function db_disconn(db) {
         if (err) {
           return console.error(err.message);
         }
-        console.log('Close the database connection.');
+        //console.log('Close the database connection.');
       });
     
 }

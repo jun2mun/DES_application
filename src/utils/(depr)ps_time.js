@@ -43,3 +43,4 @@ getForegroundDuration(null, (err, duration) => {
     console.log(`Foreground process duration: ${duration} ms`);
   }
 });
+
