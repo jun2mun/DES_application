@@ -32,6 +32,7 @@ cur_cnt = 0
 process_on = True
 camera_loaded = False
 is_camera = False
+ISAVL = False
 
 def socket_init():
     # instantiate a socket object
@@ -64,8 +65,12 @@ def socket_func(sock,conn):
 
                 else:
                     if camera_loaded:    
-                        print('count : ',cur_cnt)
-                        sendTextViaSocket(f'{cur_cnt}',conn)
+                        if ISAVL:
+                            #print('ISAVL count : ',cur_cnt) # 출력 안됨
+                            sendTextViaSocket(f'{cur_cnt}',conn)
+                        else:
+                            #print('ISAVL not detected') # 출력 안됨
+                            sendTextViaSocket(f'not detected',conn)
                     else:
                         sendTextViaSocket(f'camera loading',conn) # 카메라 없으면 그때 동안은 0(카메라 없음)으로 측정
             elif data.decode('utf-8') == "close":
@@ -88,7 +93,7 @@ def sendTextViaSocket(message, sock):
 
 
 def camera():
-    global cur_cnt,is_camera,camera_loaded
+    global cur_cnt,is_camera,camera_loaded,ISAVL
     
     COUNTER = 0
     TOTAL = 0
@@ -131,10 +136,12 @@ def camera():
             boxes_face = np.expand_dims(boxes_face[index],axis=0)
             # blinks_detector
             COUNTER,TOTAL = detector.eye_blink(gray,rectangles,COUNTER,TOTAL)
-        
+            ISAVL = True
+            print("count : " ,TOTAL)
         else:
             img_post = im
-        print("count : " ,TOTAL)
+            print("not detected")
+            ISAVL = False
         cur_cnt = TOTAL
 
 
