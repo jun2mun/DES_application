@@ -107,7 +107,9 @@ class mainPages {
         button.appendChild(img);
         
         button.addEventListener("click", (e) => {
-            const href = window.location.href ='#dashboard';
+            const href = window.location.href ='#Renewal';
+            //const href = window.location.href ='#dashboard';
+            
             //console.log(href);
         })
 

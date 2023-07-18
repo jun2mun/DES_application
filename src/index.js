@@ -2,6 +2,7 @@
 const {mainPages} = require('./src/pages/main.js');
 const {detailPages} = require('./src/pages/detail.js');
 const {dashboardPage} = require('./src/pages/dashboard.js')
+const { RenewalPage } = require('./src/pages/renewal.js');
 
 // DEMO PAGE //
 const {detailTestPages} = require('./src/pages/detail_demo.js');
@@ -18,9 +19,11 @@ const dashboard = new dashboardPage(app);
 // DEMO CLASS//
 const detail_demo = new detailTestPages(app);
 const dashboard_demo = new dashboardTestPage(app);
+const Renewal = new RenewalPage(app); 
 
 // EXTERNAL LIBRARY //
 const {ipcRenderer} = require('electron');
+
 
 class IndexView {
     constructor(){
@@ -53,6 +56,7 @@ class IndexView {
             { path: /detail/, start:() => detail.setState(url)},
             { path: /dashboard/, start:() => dashboard.setState()},
             // DEMO PAGE //
+            { path: /Renewal/, start:() => Renewal.setState(url)},
             { path: /detail_demo/, start:() => detail_demo.setState(url)},
             { path: /dashboard_demo/, start:() => dashboard_demo.setState()},
         ];

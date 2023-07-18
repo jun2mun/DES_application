@@ -16,7 +16,7 @@ function box($body,title=null,content=null,comment=null){
     // 
     const div = document.createElement("div");
     div.setAttribute("class","box")
-    div.style.width = '650px';
+    div.style.width = '500px'; //650
     div.style.margin = '10px 10px 10px 10px';
 
     if (title != null){

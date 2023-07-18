@@ -24,8 +24,8 @@ const camera_service = sub_process() // 카메라 실행
 const createWindow = () => { // 데스크톱 앱 화면 띄우기
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 1000,
+    width: 1400,
+    height: 1200,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration : true, // ?? Electron require() is not defined sol

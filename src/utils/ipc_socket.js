@@ -11,9 +11,11 @@ module.exports = class ipc_socket{
     this.client_on = false
      // TODO 이벤트 핸들러 형식으로 변경
     this.prev_name = '';
-    this.prev_pid = '';
+    this.prev_pid = undefined;
+    this.prev_status = undefined;
     this.prev_time = '';
     this.pre_eye_cnt = 0;
+    this.isface = false // 얼굴감지 되나
     // 1초마다 프로세스 변경되었나 감지
   }
 
@@ -47,15 +49,18 @@ module.exports = class ipc_socket{
       ) 
   }
 
-  send_message(message){
-    this.client.write(message)
+  async send_message(message){
+    return this.client.write(message)
   }
   async yes_client(){
 
     let yes_client_timer = setInterval(()=>{
       if (this.client_on){
         console.log("link with socket server")
-        this.client.write('start') // 이벤트 전달
+        this.client.write('start')
+
+      
+         // 이벤트 전달
       }
       else{
         clearInterval(yes_client_timer)
@@ -80,34 +85,87 @@ module.exports = class ipc_socket{
       let [name,pid] = getCurrentForegroundProcess();
       name = name.split('\\')
       name = name[name.length-1] + 'e'
-      let eye_cnt = data.toString()
-      if ( (this.prev_pid !== pid && this.prev_pid !== '') && (!(eye_cnt == 'no camera' || eye_cnt == 'camera loading' )) ) {
-        
-        console.log('--- foreground change ---')
-
-        let day = getTimeOfDay() ;let hours = day[0]; let minutes = day[1]; let seconds = day[2]
-        let value = getDate(); let year = value[0] ; let month = value[1]; let date = value[2]
-        let cur_time = `${hours}:${minutes}:${seconds}`
-        let db = db_conn()
-        
-        let query = `INSERT INTO process (name,start_time,end_time,count,date) VALUES ('${this.prev_name}','${this.prev_time}','${cur_time}',${eye_cnt-this.pre_eye_cnt},'${year}-${month}-${date}')`
-        console.log('query',query,eye_cnt,this.pre_eye_cnt)
-
-        this.prev_pid = pid
-        this.prev_name = name
-        this.prev_time = cur_time
-        this.pre_eye_cnt = eye_cnt
-
-        db_comm(db,'INSERT',query)
-        db_disconn(db)
-
-      }
-
-      if (this.prev_pid == ''){
+      data = data.toString()
+      
+      let eye_cnt = data.split(',')[1]; let status = data.split(',')[0]
+      console.log('data input : ',data,'||',eye_cnt,status)
+      console.log('status :',this.prev_pid,pid,this.prev_status)
+      if ((this.prev_pid == undefined) || (this.prev_status != 'not_detected' && this.prev_status != 'detected') ){
         // 처음 시작하면
         this.prev_pid = pid
         this.prev_name = name
+        this.prev_status = status
       }
+
+      if (status == 'not_detected'){
+        let day = getTimeOfDay() ;let hours = day[0]; let minutes = day[1]; let seconds = day[2]
+        let value = getDate(); let year = value[0] ; let month = value[1]; let date = value[2]
+        let cur_time = `${hours}:${minutes}:${seconds}`
+
+        if (this.prev_status == 'not detected'){
+          if ( (this.prev_pid !== pid)) {
+            this.prev_pid = pid
+            this.prev_name = name
+          }
+        }
+        if (this.prev_status == 'detected'){
+          if ( (this.prev_pid !== pid)) {
+            console.log(eye_cnt,status)
+            console.log('--- foreground change ---')
+
+            let db = db_conn()
+        
+            let query = `INSERT INTO process (name,start_time,end_time,count,date) VALUES ('${this.prev_name}','${this.prev_time}','${cur_time}',${eye_cnt-this.pre_eye_cnt},'${year}-${month}-${date}')`
+            console.log('query',query,eye_cnt,this.pre_eye_cnt)
+
+            this.prev_pid = pid
+            this.prev_name = name
+
+            db_comm(db,'INSERT',query)
+            db_disconn(db)
+          }
+        }
+
+      }
+
+      if (status == 'detected'){
+        let day = getTimeOfDay() ;let hours = day[0]; let minutes = day[1]; let seconds = day[2]
+        let value = getDate(); let year = value[0] ; let month = value[1]; let date = value[2]
+        let cur_time = `${hours}:${minutes}:${seconds}`
+        
+        if (this.prev_status == 'not detected'){
+          this.prev_status = status
+        }
+        if (this.prev_status == 'detected'){
+          // 프로세스 변경 감지 시,
+          if ( (this.prev_pid !== pid)) {
+            console.log(eye_cnt,status)
+            console.log('--- foreground change ---')
+
+            let db = db_conn()
+        
+            let query = `INSERT INTO process (name,start_time,end_time,count,date) VALUES ('${this.prev_name}','${this.prev_time}','${cur_time}',${eye_cnt-this.pre_eye_cnt},'${year}-${month}-${date}')`
+            console.log('query',query,eye_cnt,this.pre_eye_cnt)
+
+            this.prev_pid = pid
+            this.prev_name = name
+
+            db_comm(db,'INSERT',query)
+            db_disconn(db)
+          }
+        }
+        if (this.prev_status == 'no_camera'){
+          this.prev_pid = pid
+          this.prev_name = name
+        }
+
+        this.prev_time = cur_time
+        this.pre_eye_cnt = eye_cnt
+      }
+      
+
+
+
 
     });
   
