@@ -16,7 +16,8 @@ function box($body,title=null,content=null,comment=null){
     // 
     const div = document.createElement("div");
     div.setAttribute("class","box")
-    div.style.width = '650px';
+    div.style.width = '300px'; //650
+    div.style.height = '300px';
     div.style.margin = '10px 10px 10px 10px';
 
     if (title != null){
@@ -56,6 +57,7 @@ function box($body,title=null,content=null,comment=null){
 
 
     if (comment != null){
+        /*
         let today = new Date();
         let hours = String(today.getHours()).padStart(2, "0"); // 시
         let minutes = String(today.getMinutes()).padStart(2, "0");  // 분
@@ -66,6 +68,7 @@ function box($body,title=null,content=null,comment=null){
         box_comment.style.fontSize = '10px'
         box_comment.innerHTML = `오늘 ${hours}:${minutes} 업데이트 됨`
         div.appendChild(box_comment)
+        */
     }
 
 

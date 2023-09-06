@@ -1,152 +1,144 @@
-import socket
-import select
+import psutil
 import time
-
-HOST = '127.0.0.1'
-PORT = 65439
-
-ACK_TEXT = 'text_received'
-###################################
-  #### eye detection library ####
-from imutils.video import VideoStream
-import cv2
-from eye_api.dlib_model import blink_detection_model
-import imutils
-from eye_api import f_detector
-import numpy as np
-####################################
-
-import queue
-import threading
+import datetime as dt
+import db_utils
+import camera
 cur_cnt = 0
-import socket
-import select
-import time
-import errno
-import threading
-import sys
+loaded = False
+class windows_api_process():
+    def __init__(self):
+        self.SQL = db_utils.internal_DB()
+        self.prev_time = None
+        self.prev_cnt = None
+        self.prev_foreground_pid = None
+        self.prev_foreground_name = None
+        self.prev_status = False
 
-HOST = '127.0.0.1'
-PORT = 65439
-cur_cnt = 0
-process_on = True
-camera_loaded = False
-is_camera = False
-
-def socket_init():
-    # instantiate a socket object
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    print('socket instantiated')
-
-    # bind the socket
-    sock.bind((HOST, PORT))
-    print('socket binded')
-
-    # start the socket listening
-    sock.listen()
-    print('socket now listening')
-
-    # accept the socket response from the client, and get the connection object
-    conn, addr = sock.accept()    # Note: execution waits here until the client calls sock.connect()
-    return sock,conn
-
-def socket_func(sock,conn):
-    global process_on
-    while 1:
-        print("waiting recv data")
+    def get_foreground_process(self):
+        # 윈도우의 포어그라운드 프로세스 ID 가져오기
         try:
+            import win32gui
+            import win32process
+        except ImportError:
+            print("win32gui 및 win32process 라이브러리가 설치되어 있지 않습니다.")
+            return None
+
+        try:
+            # 현재 포커스를 가진 윈도우의 핸들 가져오기
+            foreground_window_handle = win32gui.GetForegroundWindow()
+
+            # 포어그라운드 윈도우의 스레드 ID 가져오기
+            thread_id, process_id = win32process.GetWindowThreadProcessId(foreground_window_handle)
+
+            # 프로세스 이름 가져오기
+            process = psutil.Process(process_id)
+            process_name = process.name()
+
+            return process_id,process_name
+        except Exception as e:
+            #print("포어그라운드 프로세스 ID를 가져오는 동안 오류가 발생했습니다:", str(e))
+            #return self.get_foreground_process()
+            return None,None
+
+    def count_handler(self):
+        pass
+
+
+    def get_date(self):
+        # (name,start_time,end_time,count,date) 프로세스 이름, 시작 시간, 종료 시간, count, 날짜
+        cur_date = dt.datetime.now()
+        cur_date = cur_date.strftime("%Y-%m-%d")
+        return cur_date
+    
+    def get_time(self):
+        cur_time = dt.datetime.now()
+        cur_time = cur_time.strftime("%H:%M:%S")
+        return cur_time
+
+    def process_handler(self):
+        self.prev_time = self.get_time()
+        date = self.get_date()
+        self.prev_cnt = camera.cur_cnt
+        self.prev_foreground_pid,self.prev_foreground_name = self.get_foreground_process()
+        self.prev_status = camera.camera_loaded
+        while True:
+            status = camera.ISAVL
+            while True:
+                foreground_pid,foreground_name = self.get_foreground_process()
+                cur_time = self.get_time()
+                if (foreground_name and foreground_name) != None:
+                    break
                 
-            data = conn.recv(1024)
-            if data.decode('utf-8') == "start":
-                if is_camera == False:
-                    sendTextViaSocket(f'0',conn) # 카메라 없으면 그때 동안은 0(카메라 없음)으로 측정
-                else:
-                    if camera_loaded:    
-                        print('count : ',cur_cnt)
-                        sendTextViaSocket(f'{cur_cnt}',conn)
-                    else:
-                        sendTextViaSocket(f'camera loading',conn) # 카메라 없으면 그때 동안은 0(카메라 없음)으로 측정
-            elif data.decode('utf-8') == "close":
-                print("close request")
-                sendTextViaSocket(f'close request',conn)
-                process_on = False
-                sys.exit()
-            time.sleep(1)
-        except socket.error as error:
-            if error.errno == errno.WSAECONNRESET:
-                sock.close()
-                sock,conn = socket_init()
+            if not status:
+                if not self.prev_status : # 감지 x -> 감지 x
+                    if self.prev_foreground_pid != foreground_pid:
+                        self.prev_foreground_name = foreground_name
+                        self.prev_foreground_pid = foreground_pid
+                        continue
+                    
+                else: # 감지 O -> 감지 x
+                    self.prev_status = status
+                    #if self.prev_foreground_pid != foreground_pid:
+                    data = {
+                        'name': f'{self.prev_foreground_name}',
+                        'start_time' : f'{self.prev_time}',
+                        'end_time' : f'{cur_time}',
+                        'count' : camera.cur_cnt - self.prev_cnt, 
+                        'date' : f'{date}'
+                    }
+                    print('hi',data)
+                    self.foreground_listener(data,camera.camera_loaded)
+                    
+                    # update
+                    self.prev_foreground_name = foreground_name
+                    self.prev_foreground_pid = foreground_pid
+                    self.prev_time = cur_time
+                    self.prev_cnt = camera.cur_cnt
+                    date = self.get_date()
 
-def sendTextViaSocket(message, sock):
-    # encode the text message
-    encodedMessage = bytes(message, 'utf-8')
+                
+            if status:
+                if not self.prev_status: # 감지 x -> 감지 o
+                    self.prev_status = status
+                else: # 감지 O -> 감지 O
+                    if self.prev_foreground_pid != foreground_pid:
+                        data = {
+                            'name': f'{self.prev_foreground_name}',
+                            'start_time' : f'{self.prev_time}',
+                            'end_time' : f'{cur_time}',
+                            'count' : camera.cur_cnt - self.prev_cnt, 
+                            'date' : f'{date}'
+                        }
+                        print('hi',data)
+                        self.foreground_listener(data,camera.camera_loaded)
+                        
+                        # update
+                        self.prev_foreground_name = foreground_name
+                        self.prev_foreground_pid = foreground_pid
+                        self.prev_time = cur_time
+                        self.prev_cnt = camera.cur_cnt
+                        date = self.get_date()
 
-    # send the data via the socket to the server
-    sock.sendall(encodedMessage)
-
-
-
-def camera():
-    global cur_cnt,is_camera,camera_loaded
+            #if foreground_pid and foreground_name:
+            #    print("현재 윈도우 포어그라운드 프로세스의 PID:", foreground_pid)
+            #    print("현재 윈도우 포어그라운드 프로세스의 이름:", foreground_name)
+            
+    def foreground_listener(self,data,boolean: bool):
+        print('hi2',data)
+        if boolean:
+            if (data['start_time'] == data['end_time'] and data['count'] == 0):
+                print('not inserted')
+                return
+            self.SQL.init()
+            self.SQL.INSERT(data)
+            pass
     
-    COUNTER = 0
-    TOTAL = 0
-
-    print('camera loading...')
-
-    detector = f_detector.eye_blink_detector()
-    # iniciar variables para el detector de parapadeo
-    cap = cv2.VideoCapture(0)
-    if not cap.isOpened():
-        print("no camera detected")
-        is_camera = False
-        sys.exit()
-    else:
-        vs = VideoStream(src=0).start()
-        is_camera = True
-        camera_loaded = True
-        
-    print('camera is ',vs)
-    print('camera loaded!!')
-
-    while True:
-        if not process_on:
-            print("while_test,out")
-            sys.exit()
-        star_time = time.time()
-        im = vs.read()
-
-        im = cv2.flip(im, 1)
-        im = imutils.resize(im, width=720)
-        gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
-        # detectar_rostro    
-        rectangles = detector.detector_faces(gray, 0)
-        boxes_face = f_detector.convert_rectangles2array(rectangles,im)
-        if len(boxes_face)!=0:
-            # seleccionar el rostro con mas area
-            areas = f_detector.get_areas(boxes_face)
-            index = np.argmax(areas)
-            rectangles = rectangles[index]
-            boxes_face = np.expand_dims(boxes_face[index],axis=0)
-            # blinks_detector
-            COUNTER,TOTAL = detector.eye_blink(gray,rectangles,COUNTER,TOTAL)
-        
-        else:
-            img_post = im
-        print("count : " ,TOTAL)
-        cur_cnt = TOTAL
-
-
-
-
-    
-
+import threading
+# 포어그라운드 프로세스 PID 가져오기
 if __name__ == '__main__': 
-    print('socket conn waiting')
-    sock,conn = socket_init()
-    print('socket connected!!')
-    t1 = threading.Thread(target=socket_func,args=(sock,conn,))
-    #t1 = threading.Thread(target=while_test1)
-    t2 = threading.Thread(target=camera)
-    t1.start()
+    api = windows_api_process()
+    t2 = threading.Thread(target=camera.camera)
+    t3 = threading.Thread(target=api.process_handler)
+    #t1.start()
     t2.start()
+    t3.start()
