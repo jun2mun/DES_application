@@ -5,6 +5,7 @@ from imutils.video import VideoStream
 import cv2
 import time
 from eye_api import f_detector
+#import f_detector
 import imutils
 import numpy as np
 
@@ -21,6 +22,7 @@ quit = False
 # ----------------------------- video -----------------------------
 #ingestar data
 def foreground():
+    global COUNTER, TOTAL
     vs = VideoStream(src=0).start()
 
     while True:
@@ -95,3 +97,5 @@ class blink_detection_model(object):
         self.stop = True
         self.vs.stop()
         self.vs = None
+    
+#foreground()

@@ -42,9 +42,13 @@ def camera():
             # blinks_detector
             COUNTER,TOTAL = detector.eye_blink(gray,rectangles,COUNTER,TOTAL)
             ISAVL = True
-            print("count : " ,TOTAL)
+            #img_post = f_detector.bounding_box(im,boxes_face,['blinks: {}'.format(TOTAL)])
+            #print("count : " ,TOTAL)
         else:
             img_post = im
             #print("not detected",TOTAL)
             ISAVL = False
         cur_cnt = TOTAL
+        #cv2.imshow('blink_detection',img_post)
+        #if cv2.waitKey(1) &0xFF == ord('q'):
+        #    break

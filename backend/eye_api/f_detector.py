@@ -1,4 +1,5 @@
 from eye_api import config as cfg
+#import config as cfg
 import cv2
 import numpy as np
 from imutils import face_utils
@@ -32,7 +33,9 @@ class eye_blink_detector():
         ear = (leftEAR + rightEAR) / 2.0
         # check to see if the eye aspect ratio is below the blink
         # threshold, and if so, increment the blink frame counter
+        #print(leftEAR,rightEAR,ear)
         if ear < cfg.EYE_AR_THRESH:
+        #if ear < cfg.RATIO_THRESH:    
             COUNTER += 1
         # otherwise, the eye aspect ratio is not below the blink
         # threshold

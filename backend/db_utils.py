@@ -6,9 +6,31 @@ class internal_DB(object):
         self.conn = None
         self.Cur = None
 
-    def init(self):
-        self.conn = sqlite3.connect('./test.db')
+    def create(self):
+        pass
+    def init(self,name='test'):
+        self.conn = sqlite3.connect(f'./{name}.db')
+
         self.Cur = self.conn.cursor()
+
+    def CREATE(self):
+        # 1분간 눈깜빡임 | 연속그룹 | 날짜 | 측정 시간대
+        try:
+            sql = f'CREATE TABLE process(id INTEGER PRIMARY KEY, count1min Integer, groupid text, date text, time text)'
+            self.Cur.execute(sql)
+        except Exception as e:
+            print('error',e)
+        finally:
+            self.conn.commit()
+
+    def SELECT(self,query=None):
+        try:
+            sql = f'select * from process'
+            self.Cur.execute(sql)
+        except Exception as e:
+            print('error',e)
+        finally:
+            self.conn.commit()
 
     def INSERT(self,data):
         COLUMNS = [key for key in data.keys()]
@@ -32,6 +54,7 @@ class internal_DB(object):
         finally:
             self.conn.commit()
 
-
-
-            
+#instance = internal_DB()
+#instance.init('main')
+#instance.CREATE()
+#instance.SELECT()

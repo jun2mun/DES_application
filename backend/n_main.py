@@ -67,6 +67,7 @@ class windows_api_process():
     def initial(self):
         self.prev_cnt = camera.cur_cnt
         self.min_handler()
+        
     def min_handler(self):
         # 누적 시간(0초), 누적 눈깜빡임(0회), 현재 총 눈 깜박임, 과거 총 눈 깜빡임 선언 및 할당
         """
@@ -75,6 +76,9 @@ class windows_api_process():
         """
         
         self.prev_time = self.get_time()
+        cur_date = dt.datetime.now()
+        cur_date = cur_date.strftime("%Y%m%d%H%M")
+        cur_date = cur_date[:-1] + 'x'
         thread_time_checker = threading.Timer(1,api.min_handler)
         thread_time_checker.start()
         status = camera.ISAVL
@@ -87,17 +91,21 @@ class windows_api_process():
             self.prev_cnt = camera.cur_cnt
             self.stack_cnt += diff_cnt
             # stack_cnt 1분 넘으면 query
-            if self.stack_time >= 10:
+            if self.stack_time >= 60:#10초
                 print('time up',self.stack_time,self.stack_cnt)
-                self.stack_time = 0; self.stack_cnt = 0
 
-                '''
+                #count1min Integer, groupid text, date text, time text
                 data = {
-                        ''
+                        'count1min' : self.stack_cnt,
+                        'groupid' : cur_date,
+                        'date' : self.get_date(),
+                        'time' : self.get_time()
                     }
-                self.SQL.init()
+                self.stack_time = 0; self.stack_cnt = 0
+                self.SQL.init('main')
                 self.SQL.INSERT(data)
-                '''
+
+                
         else:
             diff_cnt = camera.cur_cnt - self.prev_cnt
             self.prev_cnt = camera.cur_cnt

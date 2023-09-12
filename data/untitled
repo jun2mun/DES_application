@@ -1,0 +1,21 @@
+SELECT
+	substr(start_time,1,10) as dt,
+    case when substr(start_time,15,2)<'10' then concat(substr(start_time,12,2),':00')
+    	 when substr(start_time,15,2) >='10' and substr(start_time,15,2)<'20' then concat(substr(start_time,12,2),':10')
+         when substr(start_time,15,2) >='20' and substr(start_time,15,2)<'30' then concat(substr(start_time,12,2),':20')
+         when substr(start_time,15,2) >='30' and substr(start_time,15,2)<'40' then concat(substr(start_time,12,2),':30')
+         when substr(start_time,15,2) >='40' and substr(start_time,15,2)<'50' then concat(substr(start_time,12,2),':40')
+         when substr(start_time,15,2) >='50' and substr(start_time,15,2)<'60' then concat(substr(start_time,12,2),':50')
+     END as hhmm,
+     count(distinct userid) as au
+FROM sameple 1
+group by substr(start_time,1,10) ,
+    case when substr(start_time,15,2)<'10' then concat(substr(start_time,12,2),':00')
+    	 when substr(start_time,15,2) >='10' and substr(start_time,15,2)<'20' then concat(substr(start_time,12,2),':10')
+         when substr(start_time,15,2) >='20' and substr(start_time,15,2)<'30' then concat(substr(start_time,12,2),':20')
+         when substr(start_time,15,2) >='30' and substr(start_time,15,2)<'40' then concat(substr(start_time,12,2),':30')
+         when substr(start_time,15,2) >='40' and substr(start_time,15,2)<'50' then concat(substr(start_time,12,2),':40')
+         when substr(start_time,15,2) >='50' and substr(start_time,15,2)<'60' then concat(substr(start_time,12,2),':50')
+     END
+order by dt , hhmm
+limit 500
