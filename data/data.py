@@ -50,8 +50,12 @@ def get_rare_data(data):
     return x
 
 def t_t_v(x,y):
-    X_train,X_test,y_train,y_test = train_test_split(x,y,test_size=0.2,random_state=1)
-    return X_train,X_test,y_train,y_test
+    X_train,X_test,Y_train,Y_test = train_test_split(x,y,test_size=0.2,random_state=1)
+    
+    X_train = X_train.reshape((X_train.shape[0], X_train.shape[1], 1))
+    X_test = X_test.reshape((X_test.shape[0], X_test.shape[1], 1))
+
+    return X_train,X_test,Y_train,Y_test
 
 
 def K_val(x,y):

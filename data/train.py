@@ -1,64 +1,91 @@
-import numpy as np
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.python.keras import layers
 from data import get_data,t_t_v,K_val,outlier_based_data,get_rare_data
 import matplotlib.pyplot as plt
 import pandas as pd
-from outlier import get_outlier
-from keras.callbacks import ModelCheckpoint, EarlyStopping
-# 30분
-layer_input = keras.Input(shape=(10,1), name='input')
-layer_rnn = keras.layers.SimpleRNN(100,name='RNN')(layer_input)
-layer_output = keras.layers.Dense(1,name='output')(layer_rnn)
-
-model = keras.Model(layer_input,layer_output)
-print(model.summary())
-
-model.compile(loss='mse',optimizer='adam')
-earlystopping = EarlyStopping(monitor='val_loss',  # 모니터 기준 설정 (val loss) 
-                              patience=10,         # 10회 Epoch동안 개선되지 않는다면 종료
-                             )
+from model import lstm_model
+import numpy as np
 '''
-df = pd.read_csv("./main.csv")
-# 함수 사용해서 이상치 값 삭제
-outlier_idx = get_outlier(df=df, column='count', weight=1.5)
-df.drop(outlier_idx, axis=0, inplace=True)
+df = pd.read_csv("./data/main.csv")
 x,y = get_data(df)
-X_train,X_test,y_train,y_test = t_t_v(x,y)
+X_train,X_valid,Y_train,Y_valid = t_t_v(x,y)
+X_train = X_train.astype(np.float32)
+X_valid = X_valid.astype(np.float32)
+Y_train = Y_train.astype(np.float32)
+Y_valid = Y_valid.astype(np.float32)
 
-outlier_idx = get_outlier(df=df, column='count', weight=1.5)
-df.drop(outlier_idx, axis=0, inplace=True)
-###
-x = get_rare_data(df)
+model = lstm_model(X_train.shape[1],1)
+model.init_model()
+lstm_history = model.model_train(X_train,Y_train,X_valid,Y_valid)
 
-plt.figure()
-#plt.plot(np.sort(x),pdf)
-plt.plot(x)
-plt.show()
+
+model.init_lstm_encoder()
+encoder_decoder_history = model.encoder_train(X_train,Y_train,X_valid,Y_valid)
 '''
-df = pd.read_csv("./main.csv")
-x,y = get_data(df)
-X_train,X_test,y_train,y_test = t_t_v(x,y)
-history = model.fit(X_train,y_train,epochs=100,batch_size=1,verbose=0,validation_data=(X_test, y_test),callbacks=[earlystopping])
-
-y_vloss = history.history['val_loss']
-y_loss = history.history['loss']
-
-x_len = np.arange(len(y_loss))
-plt.plot(x_len, y_vloss, marker='.', c='red', label="Validation-set Loss")
-plt.plot(x_len, y_loss, marker='.', c='blue', label="Train-set Loss")
-
-plt.legend(loc='upper right')
-plt.grid()
-plt.xlabel('epoch')
-plt.ylabel('loss')
-plt.show()
 
 
-x_input = np.array([10,11,8,10,9,6,2,11,4,5])
-x_input = x_input.reshape((1,10,1))
- 
-yhat = model.predict(x_input)
+import os
+import numpy as np
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import seaborn as sns
+from tensorflow import keras
 
-print(yhat)
+from model import LstmAE
+
+
+
+def train():
+
+
+    df = pd.read_csv("./data/main.csv")
+    
+    x = get_rare_data(df)
+    x.astype(np.float32)
+    x.reshape(-1,1)
+    train = x[: 80]
+    test = x[80:]    
+    
+    scaler = StandardScaler()
+    #scaler = scaler.fit(x)
+
+    #train = scaler.transform(train)
+    #test = scaler.transform(test)
+    
+    seq_len = 10
+
+    X = []
+    for i in range(len(train) - seq_len):
+        X.append(train[i:(i+seq_len)])
+    trainX = np.array(X)
+    trainX = trainX.reshape(-1,seq_len,1)
+    trainX = trainX.astype('float32')
+    input_dim = trainX.shape[2]
+    latent_dim = 64
+
+    # specify learning rate
+    learning_rate = 0.001
+    # create an Adam optimizer with the specified learning rate
+    adam = keras.optimizers.Adam(learning_rate=learning_rate)
+
+    # create lstm_ae agent
+    lstm_ae = LstmAE(seq_len, input_dim, latent_dim)
+    lstm_ae.compile(loss='mse',optimizer='adam')
+
+    # train
+    history = lstm_ae.fit(trainX, trainX, epochs=100, batch_size=32, validation_split=0.1, verbose=2)
+
+    # save weights
+    lstm_ae.save_weights("./data/save_weights/lstm_ae.h5")
+
+    # plotting
+    plt.plot(history.history['loss'], label='Training loss')
+    plt.plot(history.history['val_loss'], label='Validation loss')
+    plt.legend()
+    plt.show()
+    print('hi')
+
+
+if __name__ == "__main__":
+
+    train()
