@@ -140,7 +140,7 @@ if __name__ == "__main__":
     lstm_ae = LstmAE(seq_len, input_dim, latent_dim)
     lstm_ae.build(input_shape=(None, seq_len, input_dim))
 
-    ev = 0
+    ev = 1
     if ev == 1:
         eval(lstm_ae, scaler, train, trainX)
     else:
