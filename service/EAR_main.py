@@ -2,6 +2,7 @@ from utils import db_utils
 import camera
 import datetime as dt
 import os
+import matplotlib.pyplot as plt
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -30,53 +31,13 @@ class Blink_API():
         cur_date = cur_date.strftime("%Y-%m-%d")
         
         return cur_date
-
-    def time_handler(self):    
-        thread_time_checker = threading.Timer(1,api.time_handler)
-        thread_time_checker.start()
-        cur_info = dt.datetime.now()
-        cur_date = cur_info.strftime("%Y%m%d%H%M")
-        cur_date = cur_date[:-1] + 'x'
-        if self.start2check:
-            self.prev_time = cur_info.strftime("%H:%M:%S")
-            self.start2check = False
-        status = camera.FACE_DETECT
-        
-        if status:
-            print('status',camera.ratio,self.stack_time,self.stack_cnt,self.prev_cnt,camera.TOTAL_BLINKS)
-            
-            self.stack_time += 1
-            diff_cnt = camera.TOTAL_BLINKS - self.prev_cnt
-            self.prev_cnt = camera.TOTAL_BLINKS
-            self.stack_cnt += diff_cnt
-            # stack_cnt 1분 넘으면 query
-            if self.stack_time >= 1:#10초
-                print('time up',self.stack_time,self.stack_cnt)
-                cur_time = dt.datetime.now().strftime("%H:%M:%S")
-                #count1min Integer, groupid text, date text, time text
-                data = {
-                        'count1min' : self.stack_cnt,
-                        'groupid' : cur_date,
-                        'date' : self.get_date(),
-                        'start_time' : self.prev_time,
-                        'end_time' : self.get_time()
-                    }
-                self.prev_time = cur_time
-                self.start2check = True
-                self.stack_time = 0; self.stack_cnt = 0
-                self.SQL.init('main')
-                self.SQL.INSERT(data)
-
-                
-        else:
-            diff_cnt = camera.TOTAL_BLINKS - self.prev_cnt
-            self.prev_cnt = camera.TOTAL_BLINKS
-            self.stack_cnt += diff_cnt
-
-        
+      
     def frame_handler(self):    
         #thread_time_checker = threading.Timer(1,api.time_handler)
         #thread_time_checker.start()
+        history = [];time_table=[]
+        stack_time = 0
+        start_time = dt.datetime.now()
         while True:
             cur_info = dt.datetime.now()
             cur_date = cur_info.strftime("%Y%m%d%H%M")
@@ -86,19 +47,25 @@ class Blink_API():
                 self.start2check = False
             status = camera.FACE_DETECT
             cur_ratio = camera.ratio
-            
+
+
             if self.prev_cnt == None:
                 self.prev_cnt = camera.TOTAL_BLINKS
             if status:
                 print('status',self.stack_time,self.stack_cnt,self.prev_cnt,camera.TOTAL_BLINKS)
                 
-                self.stack_time += 1
                 diff_cnt = camera.TOTAL_BLINKS - self.prev_cnt
                 self.prev_cnt = camera.TOTAL_BLINKS
-                self.stack_cnt += diff_cnt
                 # stack_cnt 1분 넘으면 query
-                cur_time = dt.datetime.now().strftime("%H:%M:%S")
+                cur_time = dt.datetime.now()
+                history += [cur_ratio]
+                stack_time += (cur_time-start_time).microseconds
+                time_table += [stack_time]
                 #count1min Integer, groupid text, date text, time text
+                if  len(history) % 10000 == 0 and history: #약 10초
+                    plt.plot(time_table,history)
+                    plt.show()
+
                 data = {
                         'EAR' : cur_ratio,
                         'count1min' : self.stack_cnt,
@@ -118,6 +85,9 @@ class Blink_API():
                 diff_cnt = camera.TOTAL_BLINKS - self.prev_cnt
                 self.prev_cnt = camera.TOTAL_BLINKS
                 self.stack_cnt += diff_cnt
+
+
+
 
 import threading
 # 포어그라운드 프로세스 PID 가져오기

@@ -37,15 +37,14 @@ def blinkRatio(img, landmarks, right_indices, left_indices):
 
     lvDistance = euclaideanDistance(lv_top, lv_bottom)
     lhDistance = euclaideanDistance(lh_right, lh_left)
-    if rvDistance == 0:
-        rvDistance = 0.001
-    if lvDistance == 0:
-        lvDistance = 0.001
-    reRatio = rhDistance/rvDistance
-    leRatio = lhDistance/lvDistance
-
+    if rhDistance == 0:
+        rhDistance = 0.001
+    if lhDistance == 0:
+        lhDistance = 0.001
+    reRatio = rvDistance/rhDistance
+    leRatio = lvDistance/lhDistance
     ratio = (reRatio+leRatio)/2
-    return ratio 
+    return ratio,reRatio,leRatio 
 # Eyes Extrctor function,
 def eyesExtractor(img, right_eye_coords, left_eye_coords):
     # converting color image to  scale image 

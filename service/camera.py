@@ -11,10 +11,10 @@ frame_counter =0
 CEF_COUNTER = 0 # ??
 TOTAL_BLINKS = 0
 FACE_DETECT = 0
-EYE_RAITO_BOUNDARY = 7
-
+EYE_RAITO_BOUNDARY = 0.13
+ratio = 0
 # constants 
-CLOSED_EYES_FRAME = 3
+CLOSED_EYES_FRAME = 2
 FONTS =cv.FONT_HERSHEY_COMPLEX
 
 
@@ -27,7 +27,7 @@ def landmarksDetection(img,results,draw=False):
     return mesh_coord     
 
 def Blink_detect_process():
-    global frame_counter,CEF_COUNTER,TOTAL_BLINKS,CLOSED_EYES_FRAME,FONTS,FACE_DETECT
+    global frame_counter,CEF_COUNTER,TOTAL_BLINKS,CLOSED_EYES_FRAME,FONTS,FACE_DETECT,ratio
     with map_face_mesh.FaceMesh(
         max_num_faces=1,
         refine_landmarks=True,
@@ -49,9 +49,12 @@ def Blink_detect_process():
             if results.multi_face_landmarks:
                 FACE_DETECT = 1
                 mesh_coords = landmarksDetection(frame, results, False)
-                ratio = blinkRatio(frame,mesh_coords,RIGHT_EYE,LEFT_EYE)
+                ratio,rightEAR,leftEAR = blinkRatio(frame,mesh_coords,RIGHT_EYE,LEFT_EYE)
+                if rightEAR > 5.0 or leftEAR > 5.0: # 한쪽 눈이 측정 안될 경우(정상적으로 maybe TODO 임의임)
+                    FACE_DETECT = 0
+                    continue
                 
-                if ratio > EYE_RAITO_BOUNDARY:
+                if ratio < EYE_RAITO_BOUNDARY:
                     CEF_COUNTER +=1
                 else:
                     if CEF_COUNTER>CLOSED_EYES_FRAME:
