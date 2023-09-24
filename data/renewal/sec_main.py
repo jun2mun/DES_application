@@ -28,19 +28,21 @@ print(sum(normal_raw_data['count'])/len(normal_raw_data)*60)
 normal_data_list = normal_raw_data['count'].values.tolist()
 
 ## 전처리
-normal_data = []; abnormal_data = [] ; seq_len =5
+normal_data = []; abnormal_data = [] ; seq_len = 60
 for i in range(len(normal_data_list) - seq_len):
     total_60 = sum(normal_data_list[i:(i+seq_len)])
     #print(f'total_60 : {total_60}')
-    if (2 <= total_60 <= 3)  :
-        normal_data.append(normal_data_list[i:(i+seq_len)])
+    if (10 <= total_60 <= 28):
+        normal_data.append(tuple(normal_data_list[i:(i+seq_len)]))
     else:
-        abnormal_data.append(normal_data_list[i:(i+seq_len)])
+        abnormal_data.append(tuple(normal_data_list[i:(i+seq_len)]))
+
+normal_data = list(set(normal_data))
+abnormal_data= list(set(abnormal_data))
 
 
-
-normal_data_count = len(normal_data)
-abnormal_data_count = len(abnormal_data)
+normal_data_count = len(normal_data) # 9564
+abnormal_data_count = len(abnormal_data)  # 3566
 
 normal_data = np.array(normal_data).reshape(-1,seq_len)
 normal_data = normal_data.astype('float32')
@@ -50,7 +52,7 @@ normal_data_test = normal_data[int(normal_data_count*0.8):int(normal_data_count*
 
 
 abnormal_data = np.array(abnormal_data).reshape(-1,seq_len)
-abnormal_data_test = abnormal_data[:]
+abnormal_data_test = abnormal_data[:int(abnormal_data_count*0.3)]
 
 
 
