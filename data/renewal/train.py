@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
+from keras.callbacks import EarlyStopping
 from sklearn import metrics
 from utils.utils import *
 from model import LstmAE
@@ -23,7 +24,9 @@ def train(x_total_train_scaled,seq_len,latent_dim):
     lstm_ae.compile(loss='mse',optimizer='adam')
 
     # train
-    history = lstm_ae.fit(x_total_train_scaled, x_total_train_scaled, epochs=300, batch_size=32, validation_split=0.1, verbose=2)
+    callbacks = [EarlyStopping(monitor='val_loss',patience=10)]
+    history = lstm_ae.fit(x_total_train_scaled, x_total_train_scaled, epochs=300, batch_size=32, 
+                          validation_split=0.1,callbacks=callbacks,verbose=2)
 
     # save weights
     lstm_ae.save_weights("./data/save_weights/lstm_ae.h5")
@@ -72,7 +75,7 @@ def calc_threshold(lstm_ae,x_valid_scaled,y_valid):
     plt.xlabel('Threshold'); plt.ylabel('Precison/Recall')
     plt.legend()
     plt.show()
-    return threshold_fixed
+    return threshold_fixed,mse,error_df
 
 def eval(lstm_ae,x_test_scaled,y_test,threshold_fixed):
     test_x_predictions_3d = lstm_ae.predict(x_test_scaled)

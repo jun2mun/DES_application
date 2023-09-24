@@ -72,7 +72,7 @@ class Encoder(Model):
     def __init__(self, seq_length, latent_dim):
         super(Encoder, self).__init__()
 
-        self.h1 = tf.keras.layers.LSTM(128, return_sequences=True)  # (seq_len, input_dim) -> (seq_len, 128))
+        self.h1 = tf.keras.layers.LSTM(32, return_sequences=True)  # (seq_len, input_dim) -> (seq_len, 128))
         self.h2 = tf.keras.layers.LSTM(latent_dim, return_sequences=False) # (seq_len , 128) -> (latent_dim)
         self.h3 = tf.keras.layers.RepeatVector(seq_length) # (latent_dim) -> (seq_length, latent_dim)
 
@@ -90,7 +90,7 @@ class Decoder(Model):
         super(Decoder, self).__init__()
 
         self.h1 = tf.keras.layers.LSTM(latent_dim, return_sequences=True) # (seq_length, latent_dim) -> (seq_len, input_dim)
-        self.h2 = tf.keras.layers.LSTM(128, return_sequences=True) # (seq_len, input_dim) -> (seq_length, 128)
+        self.h2 = tf.keras.layers.LSTM(32, return_sequences=True) # (seq_len, input_dim) -> (seq_length, 128)
         self.h3 = tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(input_dim)) # (seq_length, 128) -> (seq_length, input_dim)
 
     def call(self, x):
