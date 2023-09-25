@@ -55,7 +55,6 @@ class Blink_API():
                 print('status',self.stack_time,self.stack_cnt,self.prev_cnt,camera.TOTAL_BLINKS)
                 
                 diff_cnt = camera.TOTAL_BLINKS - self.prev_cnt
-                self.prev_cnt = camera.TOTAL_BLINKS
                 # stack_cnt 1분 넘으면 query
                 cur_time = dt.datetime.now()
                 history += [cur_ratio]
@@ -68,13 +67,14 @@ class Blink_API():
 
                 data = {
                         'EAR' : cur_ratio,
-                        'count1min' : self.stack_cnt,
+                        'count1min' : diff_cnt,
                         'groupid' : cur_date,
                         'date' : self.get_date(),
                         'start_time' : self.prev_time,
                         'end_time' : self.get_time()
                     }
                 self.prev_time = cur_time
+                self.prev_cnt = camera.TOTAL_BLINKS
                 self.start2check = True
                 self.stack_time = 0; self.stack_cnt = 0
                 self.SQL.init('EAR')
