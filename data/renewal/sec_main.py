@@ -23,16 +23,20 @@ if gpus:
         print(e)
 
 
-normal_raw_data = pd.read_csv("./data/renewal/second.csv")
-print(sum(normal_raw_data['count'])/len(normal_raw_data)*60)
-normal_data_list = normal_raw_data['count'].values.tolist()
+normal_raw_data = pd.read_csv("./data/renewal/second_EAR.csv")
+normal_data_list = normal_raw_data['EAR'].values.tolist()
+
 
 ## 전처리
 normal_data = []; abnormal_data = [] ; seq_len = 60
 for i in range(len(normal_data_list) - seq_len):
-    total_60 = sum(normal_data_list[i:(i+seq_len)])
+    temp = normal_data_list[i:(i+seq_len)]
     #print(f'total_60 : {total_60}')
-    if (10 <= total_60 <= 28):
+    anomal = False
+    for x in temp:
+        if x > 0.3:
+            anomal = True
+    if (anomal):
         normal_data.append(tuple(normal_data_list[i:(i+seq_len)]))
     else:
         abnormal_data.append(tuple(normal_data_list[i:(i+seq_len)]))
@@ -60,7 +64,7 @@ print([sum(i)for i in normal_data_test.tolist()])
 ## 테스트 검증 데이터 만들기
 normal_test_tot = np.hstack((normal_data_test,np.zeros(normal_data_test.shape[0]).reshape(-1,1))) # 
 abnormal_test_tot = np.hstack((abnormal_data_test,np.ones(abnormal_data_test.shape[0]).reshape(-1,1))) # 
-test_tot = np.vstack((normal_test_tot[:1000],abnormal_test_tot[:1000]))
+test_tot = np.vstack((normal_test_tot,abnormal_test_tot))
 
 #x_test,x_valid,y_test,y_valid = train_test_split(total_test_tot[:,:-1],total_test_tot[:,-1],test_size=0.3)
 x_test,x_valid,y_test,y_valid = train_test_split(test_tot[:,:-1],test_tot[:,-1],test_size=0.3)
