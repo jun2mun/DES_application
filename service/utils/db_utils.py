@@ -9,7 +9,7 @@ class internal_DB(object):
 
     def create(self):
         pass
-    def init(self,name='test'):
+    def init(self,name='test',custom = f'CREATE TABLE process(id INTEGER PRIMARY KEY,EAR Integer, count1min Integer, groupid text, date text, start_time text, end_time text)'):
         file_name = f'./second_{name}.db'
         if os.path.isfile(file_name):
             self.conn = sqlite3.connect(file_name)
@@ -19,10 +19,10 @@ class internal_DB(object):
             self.conn = sqlite3.connect(file_name)
 
             self.Cur = self.conn.cursor()
-            self.CREATE()
+            self.CREATE(custom)
 
 
-    def CREATE(self):
+    def CREATE(self,sql = f'CREATE TABLE process(id INTEGER PRIMARY KEY,EAR Integer, count1min Integer, groupid text, date text, start_time text, end_time text)'):
         # 1분간 눈깜빡임 | 연속그룹 | 날짜 | 측정 시간대
         try:
             sql = f'CREATE TABLE process(id INTEGER PRIMARY KEY,EAR Integer, count1min Integer, groupid text, date text, start_time text, end_time text)'

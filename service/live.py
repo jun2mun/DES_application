@@ -59,6 +59,8 @@ with map_face_mesh.FaceMesh(
                 CEF_COUNTER +=1
                 # cv.putText(frame, 'Blink', (200, 50), FONTS, 1.3, utils.PINK, 2)
                 utils.colorBackgroundText(frame,  f'Blink', FONTS, 1.7, (int(frame_height/2), 100), 2, utils.YELLOW, pad_x=6, pad_y=6, )
+               
+                
             else:
                 if CEF_COUNTER>CLOSED_EYES_FRAME:
                     TOTAL_BLINKS +=1

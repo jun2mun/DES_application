@@ -11,32 +11,34 @@ def euclaideanDistance(point, point1):
     return distance
 
 # Blinking Ratio
-def blinkRatio(img, landmarks, right_indices, left_indices):
+def blinkRatio_4(img, landmarks, right_indices, left_indices):
     # Right eyes 
     # horizontal line 
-    rh_right = landmarks[right_indices[0]]
-    rh_left = landmarks[right_indices[8]]
+    rh_right = landmarks[right_indices[0]] # 33
+    rh_left = landmarks[right_indices[8]] # 133
     # vertical line 
-    rv_top = landmarks[right_indices[12]]
-    rv_bottom = landmarks[right_indices[4]]
+    rv_top = landmarks[right_indices[12]] # 159
+    rv_bottom = landmarks[right_indices[4]] # 145
     # draw lines on right eyes 
     # cv.line(img, rh_right, rh_left, utils.GREEN, 2)
     # cv.line(img, rv_top, rv_bottom, utils.WHITE, 2)
 
     # LEFT_EYE 
     # horizontal line 
-    lh_right = landmarks[left_indices[0]]
-    lh_left = landmarks[left_indices[8]]
+    lh_right = landmarks[left_indices[0]] # 362
+    lh_left = landmarks[left_indices[8]] # 263
 
     # vertical line 
-    lv_top = landmarks[left_indices[12]]
-    lv_bottom = landmarks[left_indices[4]]
+    lv_top = landmarks[left_indices[12]] # 386
+    lv_bottom = landmarks[left_indices[4]] # 374
 
     rhDistance = euclaideanDistance(rh_right, rh_left)
     rvDistance = euclaideanDistance(rv_top, rv_bottom)
 
     lvDistance = euclaideanDistance(lv_top, lv_bottom)
     lhDistance = euclaideanDistance(lh_right, lh_left)
+    if (rhDistance < 0.03) or (lhDistance < 0.03):
+        print('hi')
     if rhDistance == 0:
         rhDistance = 0.001
     if lhDistance == 0:
@@ -45,6 +47,68 @@ def blinkRatio(img, landmarks, right_indices, left_indices):
     leRatio = lvDistance/lhDistance
     ratio = (reRatio+leRatio)/2
     return ratio,reRatio,leRatio 
+
+
+
+# Blinking Ratio (6개사용 landmark )
+def blinkRatio(img, landmarks, right_indices, left_indices):
+    
+    
+    # Left eyes indices 
+    #LEFT_EYE =[ 362, 382, 381, 380, 374, 373, 390, 249, 263, 466, 388, 387, 386, 385,384, 398 ]
+    #LEFT_EYEBROW =[ 336, 296, 334, 293, 300, 276, 283, 282, 295, 285 ]
+
+    # right eyes indices
+    #RIGHT_EYE=[ 33, 7, 163, 144, 145, 153, 154, 155, 133, 173, 157, 158, 159, 160, 161 , 246 ]  
+    #RIGHT_EYEBROW=[ 70, 63, 105, 66, 107, 55, 65, 52, 53, 46 ]
+    
+    # Right eyes 
+    # horizontal line 
+    rh_right = landmarks[right_indices[0]] # 33
+    rh_left = landmarks[right_indices[8]] # 133
+    # vertical line 
+    rv_top_left = landmarks[right_indices[13]] # 160
+    rv_top_right = landmarks[right_indices[11]] # 158
+    
+    rv_bottom_left = landmarks[right_indices[3]] # 144
+    rv_bottom_right = landmarks[right_indices[5]] # 153
+    
+    # draw lines on right eyes 
+    # cv.line(img, rh_right, rh_left, utils.GREEN, 2)
+    # cv.line(img, rv_top, rv_bottom, utils.WHITE, 2)
+
+    # LEFT_EYE 
+    # horizontal line 
+    lh_right = landmarks[left_indices[0]] # 362
+    lh_left = landmarks[left_indices[8]] # 263
+
+    # vertical line 
+    lv_top_left = landmarks[left_indices[13]] # 385
+    lv_top_right = landmarks[left_indices[11]] # 387
+    lv_bottom_left = landmarks[left_indices[3]] # 380
+    lv_bottom_right = landmarks[left_indices[5]] # 373
+    
+
+    rhDistance = euclaideanDistance(rh_right, rh_left)
+    rvDistance_left = euclaideanDistance(rv_top_left, rv_bottom_left)
+    rvDistance_right = euclaideanDistance(rv_top_right, rv_bottom_right)
+
+    lhDistance = euclaideanDistance(lh_right, lh_left)
+    lvDistance_left = euclaideanDistance(lv_top_left, lv_bottom_left)
+    lvDistance_right = euclaideanDistance(lv_top_right, lv_bottom_right)
+    
+    # 0.06 이하 정도가 눈 완전히 감음 (TODO 이거는 본인 기준)
+    # 0.08x 이상이 눈뜨는 시점으로 봄
+    reRatio = (rvDistance_left+rvDistance_right)/(2* rhDistance)
+    leRatio = (lvDistance_left+lvDistance_right)/(2* lhDistance)
+    ratio = (reRatio+leRatio)/2
+
+    if ratio < 0.09:
+        print('h')
+    return ratio,reRatio,leRatio 
+
+
+
 # Eyes Extrctor function,
 def eyesExtractor(img, right_eye_coords, left_eye_coords):
     # converting color image to  scale image 
