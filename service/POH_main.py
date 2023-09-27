@@ -38,6 +38,7 @@ class Blink_API():
         history = [];time_table=[]
         stack_time = 0
         start_time = dt.datetime.now()
+        prev_data = {}
         while True:
             cur_info = dt.datetime.now()
             cur_date = cur_info.strftime("%Y%m%d%H%M")
@@ -53,24 +54,25 @@ class Blink_API():
                 self.prev_cnt = camera.TOTAL_BLINKS
             if status:
                 print('status',self.stack_time,self.stack_cnt,self.prev_cnt,camera.TOTAL_BLINKS)
-                
-                ecp,cdp,eop,next_IBI_end,prev_IBI_start,history = camera.result
+
+                if camera.result and not 0 in camera.result:
+                    ecp,cdp,eop,next_IBI_end,prev_IBI_start,history = camera.result
 
 
-                data = {
-                        'ecp' : f'{ecp}',
-                        'cdp' : f'{cdp}',
-                        'eop' : f'{eop}',
-                        'next_IBI_end' : f'{next_IBI_end}',
-                        'prev_IBI_start' : f'{prev_IBI_start}'
-                    }
-                
-                self.prev_cnt = camera.TOTAL_BLINKS
-                self.start2check = True
-                self.stack_time = 0; self.stack_cnt = 0
-                self.SQL.init(name='EARSS',custom=f'CREATE TABLE process(EAR_ID INTEGER PRIMARY KEY,ecp text, cdp text, eop text, next_IBI_end text, prev_IBI_start text)')
-                self.SQL.INSERT(data)
-
+                    data = {
+                            'ecp' : f'{ecp}',
+                            'cdp' : f'{cdp}',
+                            'eop' : f'{eop}',
+                            'next_IBI_end' : f'{next_IBI_end}',
+                            'prev_IBI_start' : f'{prev_IBI_start}'
+                        }
+                    if data != prev_data:    
+                        self.prev_cnt = camera.TOTAL_BLINKS
+                        self.start2check = True
+                        self.stack_time = 0; self.stack_cnt = 0
+                        self.SQL.init(name='EARSS',custom=f'CREATE TABLE process(EAR_ID INTEGER PRIMARY KEY,ecp text, cdp text, eop text, next_IBI_end text, prev_IBI_start text)')
+                        self.SQL.INSERT(data)
+                        prev_data = data
                     
             else:
                 diff_cnt = camera.TOTAL_BLINKS - self.prev_cnt

@@ -25,7 +25,7 @@ class internal_DB(object):
     def CREATE(self,sql = f'CREATE TABLE process(id INTEGER PRIMARY KEY,EAR Integer, count1min Integer, groupid text, date text, start_time text, end_time text)'):
         # 1분간 눈깜빡임 | 연속그룹 | 날짜 | 측정 시간대
         try:
-            sql = f'CREATE TABLE process(id INTEGER PRIMARY KEY,EAR Integer, count1min Integer, groupid text, date text, start_time text, end_time text)'
+            sql = sql
             self.Cur.execute(sql)
         except Exception as e:
             print('error',e)

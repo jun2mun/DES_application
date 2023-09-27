@@ -20,13 +20,14 @@ FONTS =cv.FONT_HERSHEY_COMPLEX
 
 
 map_face_mesh = mp.solutions.face_mesh
-camera = cv.VideoCapture(0)
-PARAMETERS=[0.218,0.0023,0.048,0.07,0.08]
+camera = cv.VideoCapture('./service/none_glass.mp4')
+PARAMETERS=[0.218,0.0023,0.048,0.075,0.075]
 MIN_MOVEMENT = 0.02 #TODO 임의
 result = []
 def calculate2db(data,history):
     global result
-    result = [0,0,0] # ecp,cdp,eop // IBI는 SQL에서
+    result = [0,0,0,0,0,0]
+    # ecp,cdp,eop // IBI는 SQL에서
     print('datetime 변경')
     if data[1] != None and data[2] != None:
         result[0] = (data[2] - data[1]).total_seconds() / 100
@@ -37,13 +38,18 @@ def calculate2db(data,history):
     elif data[3] != None and data[4] != None:
         result[2] = (data[4] - data[3]).total_seconds() / 100
     
-    for i in result:
-        if i == 0:
+    min_idx = 100
+    for i in range(len(result)):
+        if result[i] == 0:
             result[i] = MIN_MOVEMENT
-        else:
-            result += [f'{i.timestamp()*1000}']
-    result += [f'{data[4].timestamp() * 1000}']
-    result += [history]
+    for k in range(len(data)):
+        if data[k] != None:
+            min_idx = k
+            break
+
+    result[3] = f'{data[min_idx].timestamp()*1000}'
+    result[4] = f'{data[4].timestamp() * 1000}'
+    result[5] = [history]
 
 def landmarksDetection(img,results,draw=False):
     img_height, img_width = img.shape[:2]
@@ -57,7 +63,9 @@ def Blink_detect_process():
         refine_landmarks=True,
         min_detection_confidence =0.5, 
         min_tracking_confidence=0.5) as face_mesh:
-
+        history = []
+        ITER_HISTORY = [None for _ in range(5)]
+        is_ok = False
         # starting Video loop here.
         while True:
             frame_counter +=1 # frame counter
@@ -104,7 +112,7 @@ def Blink_detect_process():
                         is_ok = True
                     
                 if POH < POH_CRITERIA[0]: # 100 프로 이하
-                    if 눈감았다_기준 < POH < POH_CRITERIA[0]: # ECP,EOP 구역
+                    if 눈뜨는_기준 < POH < POH_CRITERIA[0]: # ECP,EOP 구역
                         if ITER_HISTORY[1] == None and ITER_HISTORY[2] == None: # CDP를 지났으면 EOP
                             ITER_HISTORY[1] = datetime.datetime.now()
                         if ITER_HISTORY[1] != None and ITER_HISTORY[3] == None:
