@@ -16,7 +16,6 @@ def train(x_total_train_scaled,seq_len,latent_dim):
 
     # input(3,5) #timestamp , feature
     input_dim = x_total_train_scaled.shape[2]
-    latent_dim = 64
 
     print('hi')
     # create lstm_ae agent

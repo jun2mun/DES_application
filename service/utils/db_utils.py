@@ -10,7 +10,7 @@ class internal_DB(object):
     def create(self):
         pass
     def init(self,name='test',custom = f'CREATE TABLE process(id INTEGER PRIMARY KEY,EAR Integer, count1min Integer, groupid text, date text, start_time text, end_time text)'):
-        file_name = f'./second_{name}.db'
+        file_name = f'./{name}.db'
         if os.path.isfile(file_name):
             self.conn = sqlite3.connect(file_name)
 
@@ -20,6 +20,14 @@ class internal_DB(object):
 
             self.Cur = self.conn.cursor()
             self.CREATE(custom)
+
+    def connect(self,name):
+        file_name = f'./{name}.db'
+
+        self.conn = sqlite3.connect(file_name)
+
+        self.Cur = self.conn.cursor()
+        return self.conn.cursor()
 
 
     def CREATE(self,sql = f'CREATE TABLE process(id INTEGER PRIMARY KEY,EAR Integer, count1min Integer, groupid text, date text, start_time text, end_time text)'):
@@ -31,6 +39,17 @@ class internal_DB(object):
             print('error',e)
         finally:
             self.conn.commit()
+    
+    def INSERTMANY(self,sql,history):
+        # 1분간 눈깜빡임 | 연속그룹 | 날짜 | 측정 시간대
+        
+        try:
+            self.Cur.executemany(sql,history)
+        except Exception as e:
+            print('error',e)
+        finally:
+            self.conn.commit()
+
 
     def SELECT(self,query=None):
         try:
@@ -57,6 +76,7 @@ class internal_DB(object):
 
         try:
             sql = f'INSERT INTO process ({COLUMNS}) VALUES ({VALUES})'
+            #sql = f'INSERT INTO SEQUENCE ({COLUMNS}) VALUES ({VALUES})'
             self.Cur.execute(sql)
         except Exception as e:
             print('error',e)

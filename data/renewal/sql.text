@@ -1,0 +1,1 @@
+select HIS.EAR_ID,HIS.EAR, case when not S.B is null then 'normal' when S.B is null then 'abnormal' end as STATE from SEQUENCE as S join (select EAR_ID,group_concat(EAR,'#')as EAR from HISTORY group by EAR_ID)HIS on HIS.EAR_ID = S.EAR_ID;

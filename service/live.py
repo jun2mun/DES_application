@@ -52,7 +52,7 @@ with map_face_mesh.FaceMesh(
         
         if results.multi_face_landmarks: # 얼굴 감지될때 (TODO 눈만 가릴때도 Blink 처리 되는거 해결 필요.)
             mesh_coords = landmarksDetection(frame, results, False)
-            ratio = blinkRatio(frame,mesh_coords,RIGHT_EYE,LEFT_EYE)
+            ratio,rightEAR,leftEAR = blinkRatio(frame,mesh_coords,RIGHT_EYE,LEFT_EYE)
             utils.colorBackgroundText(frame,  f'Ratio : {round(ratio,2)}', FONTS, 0.7, (30,100),2, utils.PINK, utils.YELLOW)
 
             if ratio < 0.22:

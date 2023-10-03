@@ -103,8 +103,6 @@ def blinkRatio(img, landmarks, right_indices, left_indices):
     leRatio = (lvDistance_left+lvDistance_right)/(2* lhDistance)
     ratio = (reRatio+leRatio)/2
 
-    if ratio < 0.09:
-        print('h')
     return ratio,reRatio,leRatio 
 
 
