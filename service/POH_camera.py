@@ -2,10 +2,14 @@ import time
 import cv2 as cv
 import mediapipe as mp
 import numpy as np
-from utils import draw as utils
 from utils.EAR import *
 from config import *
 import datetime
+from utils import db_utils
+from collections import deque
+import threading
+import re
+
 
 # variables 
 frame_counter =0
@@ -18,38 +22,137 @@ ratio = 0
 CLOSED_EYES_FRAME = 2
 FONTS =cv.FONT_HERSHEY_COMPLEX
 
+work_queue = deque([])
 
 map_face_mesh = mp.solutions.face_mesh
-camera = cv.VideoCapture('./service/none_glass.mp4')
-PARAMETERS=[0.218,0.0023,0.048,0.075,0.075]
-MIN_MOVEMENT = 0.02 #TODO 임의
-result = []
-def calculate2db(data,history):
-    global result
-    result = [0,0,0,0,0,0]
-    # ecp,cdp,eop // IBI는 SQL에서
-    print('datetime 변경')
-    if data[1] != None and data[2] != None:
-        result[0] = (data[2] - data[1]).total_seconds() / 100
+camera = cv.VideoCapture(0)
 
-    elif data[2] != None and data[3] != None:
-        result[1] = (data[3] - data[2]).total_seconds() / 100
 
-    elif data[3] != None and data[4] != None:
-        result[2] = (data[4] - data[3]).total_seconds() / 100
-    
-    min_idx = 100
-    for i in range(len(result)):
-        if result[i] == 0:
-            result[i] = MIN_MOVEMENT
-    for k in range(len(data)):
-        if data[k] != None:
-            min_idx = k
-            break
 
-    result[3] = f'{data[min_idx].timestamp()*1000}'
-    result[4] = f'{data[4].timestamp() * 1000}'
-    result[5] = [history]
+def monitoring():
+    global event,work_queue
+
+    SQL = db_utils.internal_DB()
+    SQL.connect(name='EAR_detail')
+    SQL.CREATE(f'CREATE TABLE HISTORY(EAR_ID TEXT, EAR text,DATE text,TIME text,SECOND text)')
+    SQL.CREATE(f'CREATE TABLE SEQUENCE(ID INTEGER PRIMARY KEY,A text, B text, E text, EAR_ID TEXT)')
+
+    prev_EAR = None; EAR = None; dictionary = ['눈감는중','눈 뜨는중']; status = 'Fall'
+    EAR_dictionary = [0.28,0.178,0.08]
+    data = []; history = []; status_list = []
+    while True:
+        #print(EAR,prev_EAR)
+        if work_queue: # 카메라에서 EAR이 측정되어야 모니터링
+            #print(f'event acquired!! & EAR is : {EAR}')
+            #lock.acquire() # 작업이 끝나기 전까지 다른 쓰레드가 공유데이터 접근을 금지
+            #print(work_queue)
+            EAR,cur_time = work_queue.popleft()
+            #'2023-10-02 10:26:35.180816'
+            cur_time = re.sub('[-:]', '', cur_time)
+            if (prev_EAR == None and EAR != None):
+                prev_EAR = EAR
+
+            if (prev_EAR > EAR):
+                status = 'Fall'
+            elif (prev_EAR < EAR):
+                status = 'UPPER'
+            # EAR 같으면 상태 변화 X
+            history += [[EAR,cur_time]]
+            # 데이터가 100%보다 낮아지면 : ‘현재 시간’ | A
+            if EAR >= EAR_dictionary[1] and status == 'Fall':
+                pass # 아무것도 일어나지 않는 곳
+            if EAR_dictionary[1] >= EAR and status == 'Fall' and len(data) == 0:
+                data += [['A',datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')]] # 저장 A
+                status_list += ['A']
+            if EAR_dictionary[2] > EAR and status == 'Fall'  and len(data) == 1:
+                data += [['B',datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')]] # 저장 B
+                status_list += ['B']
+            ## EOP,LOP는 측정이 안되는 경우가 많음 ##
+            #if EAR_dictionary[3] >= EAR >= EAR_dictionary[2] and status == 'UPPER'  and len(data) == 2:
+            #    data += [['C',datetime]] # 저장 C
+            #if EAR_dictionary[4] >= EAR >= EAR_dictionary[3] and status == 'UPPER'  and len(data) == 3:
+            #    data += [['D',datetime]] # 저장 D
+            if EAR >= EAR_dictionary[1] and status == 'UPPER'  and (len(data) == 1 or len(data) == 2):
+                data += [['E',datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')]] # 저장 E
+                status_list += ['E']
+
+            ##
+            #print(status_list)  
+            if len(data) >= 2:
+                timestamp = time.time()
+                ID_UUID = str(timestamp)
+                if data[0][0] == 'A' and data[1][0] == 'E': # 비정상 종료
+                    print('비정상 깜박')
+                    data = {
+                        'A' : data[0][1],
+                        'E' : data[1][1],
+                        'EAR_ID' : ID_UUID
+                    }
+                    #{timestamp_date},{timestamp_time[:6]},{timestamp_time[6:]} DATE,TIME,SECOND
+                    # '20231002 102635 180816'
+                    history = [(ID_UUID,value_EAR,value_timestamp[:8],value_timestamp[9:15],value_timestamp[15:]) for value_EAR,value_timestamp in history]
+                    
+                    COLUMNS = [key for key in data.keys()]
+                    VALUES = [data[val] for val in COLUMNS] 
+                    COLUMNS = ','.join(COLUMNS)
+
+                    for idx in range(len(VALUES)):
+                        if type(VALUES[idx]) == str:
+                            VALUES[idx] = "\"" + VALUES[idx] + "\""
+                        elif type(VALUES[idx]) == int or float:
+                            VALUES[idx] = str(VALUES[idx])
+                    
+                    VALUES = ','.join(VALUES)
+                    #print(VALUES)
+                    try:
+                        SQL.Cur.execute(f'INSERT INTO SEQUENCE ({COLUMNS}) VALUES ({VALUES})')                     
+                        SQL.Cur.executemany(f'INSERT INTO HISTORY VALUES (?,?,?,?,?)',history)
+                    except Exception as e:
+                        print('error',e)
+                    finally:
+                        SQL.conn.commit()
+                    #DB.insert()
+                    data = []; history = [];status_list =[]
+                elif len(data) == 3: # 정상 종료
+                    print('정상 깜박')
+                    data = {
+                        'A' : data[0][1],
+                        'B' : data[1][1],
+                        'E' : data[2][1],
+                        'EAR_ID' : ID_UUID
+                    }
+                    history = [(ID_UUID,value_EAR,value_timestamp[:8],value_timestamp[9:15],value_timestamp[15:]) for value_EAR,value_timestamp in history]
+
+
+                    COLUMNS = [key for key in data.keys()]
+                    VALUES = [data[val] for val in COLUMNS] 
+                    COLUMNS = ','.join(COLUMNS)
+
+                    for idx in range(len(VALUES)):
+                        if type(VALUES[idx]) == str:
+                            VALUES[idx] = "\"" + VALUES[idx] + "\""
+                        elif type(VALUES[idx]) == int or float:
+                            VALUES[idx] = str(VALUES[idx])
+                    
+                    VALUES = ','.join(VALUES)
+                    #print(VALUES)
+                    try:
+                        SQL.Cur.execute(f'INSERT INTO SEQUENCE ({COLUMNS}) VALUES ({VALUES})')
+                        SQL.Cur.executemany(f'INSERT INTO HISTORY VALUES (?,?,?,?,?)',history)
+                    except Exception as e:
+                        print('error',e)
+                    finally:
+                        SQL.conn.commit()
+
+                    data = []; history = [];status_list =[]
+
+ 
+
+            #lock.release() # lock 해제`
+        # camera 끝나면
+        else:
+            #print('not detect')
+            pass
 
 def landmarksDetection(img,results,draw=False):
     img_height, img_width = img.shape[:2]
@@ -58,16 +161,16 @@ def landmarksDetection(img,results,draw=False):
 
 def Blink_detect_process():
     global frame_counter,CEF_COUNTER,TOTAL_BLINKS,CLOSED_EYES_FRAME,FONTS,FACE_DETECT,ratio
+    global EAR,event,work_queue
     with map_face_mesh.FaceMesh(
         max_num_faces=1,
         refine_landmarks=True,
         min_detection_confidence =0.5, 
         min_tracking_confidence=0.5) as face_mesh:
-        history = []
-        ITER_HISTORY = [None for _ in range(5)]
-        is_ok = False
         # starting Video loop here.
+        
         while True:
+            event = False
             frame_counter +=1 # frame counter
             ret, frame = camera.read() # getting frame from camera 
             if not ret: 
@@ -85,60 +188,28 @@ def Blink_detect_process():
                 if rightEAR > 5.0 or leftEAR > 5.0: # 한쪽 눈이 측정 안될 경우(정상적으로 maybe TODO 임의임)
                     FACE_DETECT = 0
                     continue
-                
-                history += [ratio]
-        
 
-                POH_MEAN,POH_VAR,POH_STD,눈감았다_기준,눈뜨는_기준 = PARAMETERS
-                POH_CRITERIA = [POH_MEAN-POH_STD,POH_MEAN,POH_MEAN+POH_STD] #최소,최대
-                
-                
-                POH = ratio # 현재 눈 비율
-                
-                #예외처리
-
-                # STATUS = ['init','ECP','CDP','EOP','IBI','n_ECP']
-                is_ok = False
-                
-                #ITER_HISTORY = [시작, ecp, cdp, eop, 정상, 다음_시작]
-                # IMI 구역 or INIT 구역
-                if POH >= POH_CRITERIA[0]:
-                    # IMI 
-                    # IMI 구역
-                    if ITER_HISTORY[0] == None:
-                        ITER_HISTORY[0] = datetime.datetime.now()
-                    if ITER_HISTORY[0] != None and ITER_HISTORY[4] == None and (ITER_HISTORY[1] !=None or ITER_HISTORY[2] !=None or ITER_HISTORY[3] !=None):
-                        ITER_HISTORY[4] = datetime.datetime.now()
-                        is_ok = True
-                    
-                if POH < POH_CRITERIA[0]: # 100 프로 이하
-                    if 눈뜨는_기준 < POH < POH_CRITERIA[0]: # ECP,EOP 구역
-                        if ITER_HISTORY[1] == None and ITER_HISTORY[2] == None: # CDP를 지났으면 EOP
-                            ITER_HISTORY[1] = datetime.datetime.now()
-                        if ITER_HISTORY[1] != None and ITER_HISTORY[3] == None:
-                            ITER_HISTORY[3] = datetime.datetime.now()
-                        
-                    elif POH <= 눈감았다_기준: # CDP 구역
-                        if ITER_HISTORY[2] == None:
-                            ITER_HISTORY[2] = datetime.datetime.now()
-
-
-                if is_ok:
-                    print('ok',ITER_HISTORY)
-                    calculate2db(ITER_HISTORY,history)
-                    ITER_HISTORY = [None for _ in range(5)]
-                    history = []
-
-
-
-
+                ## GLOBAL 변수 ##
+                work_queue.append([ratio,datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')])
+                #################
                 if ratio < EYE_RAITO_BOUNDARY:
                     CEF_COUNTER +=1
                 else:
                     if CEF_COUNTER>CLOSED_EYES_FRAME:
                         TOTAL_BLINKS +=1
                         CEF_COUNTER =0
+            
             else:
                 FACE_DETECT = 0
         cv.destroyAllWindows()
         camera.release()
+
+
+# 포어그라운드 프로세스 PID 가져오기
+if __name__ == '__main__':
+    t2 = threading.Thread(target=Blink_detect_process)
+    #t3 = threading.Thread(target=api.initial)
+    t4 = threading.Thread(target=monitoring)
+    t2.start()
+    t4.start()
+    #t3.start()

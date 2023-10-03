@@ -16,10 +16,11 @@ ratio = 0
 # constants 
 CLOSED_EYES_FRAME = 2
 FONTS =cv.FONT_HERSHEY_COMPLEX
+allover = False
 
 
 map_face_mesh = mp.solutions.face_mesh
-camera = cv.VideoCapture(0)
+camera = cv.VideoCapture('C:/Users/owner/Downloads/deepfake/Training/160372_003.mp4')
 
 def landmarksDetection(img,results,draw=False):
     img_height, img_width = img.shape[:2]
@@ -27,7 +28,7 @@ def landmarksDetection(img,results,draw=False):
     return mesh_coord     
 
 def Blink_detect_process():
-    global frame_counter,CEF_COUNTER,TOTAL_BLINKS,CLOSED_EYES_FRAME,FONTS,FACE_DETECT,ratio
+    global frame_counter,CEF_COUNTER,TOTAL_BLINKS,CLOSED_EYES_FRAME,FONTS,FACE_DETECT,ratio,allover
     with map_face_mesh.FaceMesh(
         max_num_faces=1,
         refine_landmarks=True,
@@ -39,6 +40,8 @@ def Blink_detect_process():
             frame_counter +=1 # frame counter
             ret, frame = camera.read() # getting frame from camera 
             if not ret: 
+                allover = True
+                print('exit the camera')
                 break # no more frames break
 
             frame.flags.writeable = False ## 필요에 따라 성능 향상을 위해 이미지 작성을 불가능함으로 기본 설정합니다.

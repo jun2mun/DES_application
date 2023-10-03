@@ -4,13 +4,12 @@
 block_cipher = None
 
 added_files = [
-('camera.py','.'),
 ('utils/EAR.py','.'),
 ('utils/db_utils.py','.'),
 ('C:/Users/owner/anaconda3/envs/pyinstall_v/Lib/site-packages/mediapipe/modules','mediapipe/modules')
 ]
 a = Analysis(
-    ['main.py'],
+    ['POH_camera.py'],
     pathex=[],
     binaries=[],
     datas= added_files ,
