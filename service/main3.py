@@ -1,5 +1,5 @@
 from utils import db_utils
-import camera
+import camera3 as camera
 import datetime as dt
 import os
 
@@ -64,7 +64,7 @@ class Blink_API():
                 self.prev_time = cur_time
                 self.start2check = True
                 self.stack_time = 0; self.stack_cnt = 0
-                self.SQL.init('second_main_4',f'CREATE TABLE process(id INTEGER PRIMARY KEY, count1min Integer, groupid text, date text, start_time text, end_time text)')
+                self.SQL.init('second_main_5',f'CREATE TABLE process(id INTEGER PRIMARY KEY, count1min Integer, groupid text, date text, start_time text, end_time text)')
                 self.SQL.INSERT(data)
 
                 

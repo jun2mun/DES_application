@@ -27,7 +27,7 @@ def get_outlier(df=None, column=None, weight=1.5):
   return outlier_idx
 
 # 함수 사용해서 이상치 값 삭제(60초 단위에서 이상치 IQR)
-df = pd.read_csv("./data/renewal/second.csv")
+df = pd.read_csv("./data/renewal/2.csv")
 df = df['count'].values.tolist()
 result = []; seq_len = 60; sequence = []
 for i in range(len(df) - seq_len):

@@ -28,7 +28,7 @@ normal_data_list = normal_raw_data['EAR'].values.tolist()
 
 
 ## 전처리
-normal_data = []; abnormal_data = [] ; seq_len = 60
+normal_data = []; abnormal_data = [] ; seq_len = 1800 #0.3 
 for i in range(len(normal_data_list) - seq_len):
     temp = normal_data_list[i:(i+seq_len)]
     #print(f'total_60 : {total_60}')

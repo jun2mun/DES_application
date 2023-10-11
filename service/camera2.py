@@ -46,9 +46,9 @@ def Blink_detect_process():
         refine_landmarks=True,
         min_detection_confidence =0.5, 
         min_tracking_confidence=0.5) as face_mesh:
-        for num in range(38,185):
+        for num in range(1,185):
             num = convert_num(num)
-            camera =cv.VideoCapture(f'X:/ai/Training/092dff5b934f87c11767/092dff5b934f87c11767_{num}.mp4')
+            camera =cv.VideoCapture(f'X:/ai/Training/0e105f8ec5146f9737d0/0e105f8ec5146f9737d0_{num}.mp4')
             print(camera,num)
             # starting Video loop here.
             while True:

@@ -25,7 +25,7 @@ FONTS =cv.FONT_HERSHEY_COMPLEX
 work_queue = deque([])
 
 map_face_mesh = mp.solutions.face_mesh
-camera = cv.VideoCapture(0)
+camera = cv.VideoCapture('X:/ai/Training/0e23d546a5f952542a00/0e23d546a5f952542a00_001.mp4')
 
 
 
@@ -174,6 +174,7 @@ def Blink_detect_process():
             frame_counter +=1 # frame counter
             ret, frame = camera.read() # getting frame from camera 
             if not ret: 
+                print('camera out')
                 break # no more frames break
 
             frame.flags.writeable = False ## 필요에 따라 성능 향상을 위해 이미지 작성을 불가능함으로 기본 설정합니다.

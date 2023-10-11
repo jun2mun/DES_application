@@ -14,8 +14,8 @@ status = df['STATE'].values.tolist()
 #sin = df['count'].values.tolist()
 #sin = count_list
 
-sin = EAR[:2000]
-sin_status = status[:2000]
+sin = EAR[:10000]
+sin_status = status[:10000]
 # Set tree parameters
 num_trees = 100
 shingle_size = 1
